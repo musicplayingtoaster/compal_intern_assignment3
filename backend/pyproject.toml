@@ -1,6 +1,6 @@
 [project]
 name = "assignment3"
-version = "0.1.0"
+version = "0.0.0"
 description = "Still Pounding Sand"
 requires-python = ">=3.12"
 dependencies = [
@@ -15,7 +15,12 @@ dependencies = [
 ]
 
 [project.scripts]
-assignment3 = "assignment3.backend.main:main"
+assignment3 = "assignment3.main:main"
+create_listener = "listener.create_listener:main"
+load_listener = "listener.load_listener:main"
+update_listener = "listener.update_listener:main"
+delete_listener = "listener.delete_listener:main"
+websocket_broadcaster = "broadcast.broadcast:main"
 
 [build-system]
 requires = ["uv_build>=0.11.20,<0.12.0"]
