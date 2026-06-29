@@ -20,6 +20,7 @@ async def init_publisher():
             name=mq_keys.EXCHANGE, 
             type=aio_pika.ExchangeType.DIRECT
         )
+        print("Producer Initialization Complete!")
 
 async def publish(routing_key, data = None):
     await _pub_exchange.publish(message=aio_pika.Message(body=json.dumps(data).encode()), 

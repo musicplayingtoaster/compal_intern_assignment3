@@ -1,22 +1,12 @@
 from typing import Annotated
-from fastapi import FastAPI, Body, WebSocket, WebSocketDisconnect, Depends, Form
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Body, Form
 import uvicorn
-from . import database, postgre_database, helper
+
 from ..resources.todo_model import Todo
-import json
-import asyncio
-
-from psycopg import Connection, AsyncConnection
-import redis
-import redis.asyncio as aioredis
-import aio_pika
-
 from ..resources import producer
 from ..resources import mq_keys
 
-
-app = FastAPI(lifespan=helper.lifespan)
+app = FastAPI()
 
 @app.post("/submit")
 async def create_todo(data: Annotated[Todo, Form()]):

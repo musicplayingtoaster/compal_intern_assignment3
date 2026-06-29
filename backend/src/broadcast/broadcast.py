@@ -42,8 +42,10 @@ _websocket_manager:WebSocketBroadcastServer = None
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         try:
-            payload = json.loads(message.body.decode())
+            payload = message.body.decode()
             
+            # Javascript will recieve a tuple of (data, action)
+            # Take the action in Javascript to determine what to do with said data
             _websocket_manager.broadcast(payload)
 
             await asyncio.sleep(0)
