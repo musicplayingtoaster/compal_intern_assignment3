@@ -3,35 +3,24 @@
 import aio_pika
 from ..resources.connections import connection_params_rabbitmq as conn_params
 from ..resources import mq_keys
-from contextlib import asynccontextmanager
-from fastapi import FastAPI
+import json
 
 # exchange name
 EXCHANGE = mq_keys.EXCHANGE
 
-rabbitmq_connection = None
+_pub_connection = None
+_pub_exchange = None
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global rabbitmq_connection
-    try:
-        rabbitmq_connection = await aio_pika.connect_robust(**conn_params)
-        print("Connected to RabbitMQ.")
-        yield
-    finally:
-        if rabbitmq_connection:
-            await rabbitmq_connection.close()
-            print("RabbitMQ connection closed.")
+async def init_publisher():
+    global _pub_connection, _pub_exchange
+    if _pub_connection is None:
+        _pub_connection = await aio_pika.connect_robust(**conn_params)
+        channel = await _pub_connection.channel()
+        _pub_exchange = await channel.declare_exchange(
+            name=mq_keys.EXCHANGE, 
+            type=aio_pika.ExchangeType.DIRECT
+        )
 
-class Producer:
-    async def __init__(self):
-        self.channel = await rabbitmq_connection.channel()
-        self.exchange = await self.channel.declare_exchange(name=EXCHANGE, type=aio_pika.ExchangeType.FANOUT)
-
-    async def publish(self, routing_key, data = None):
-        await self.exchange.publish(message=aio_pika.Message(body=data.encode()), 
-                                    routing_key=routing_key)
-        
-
-# import .producer into other scripts
-producer = Producer()
+async def publish(routing_key, data = None):
+    await _pub_exchange.publish(message=aio_pika.Message(body=json.dumps(data).encode()), 
+                                routing_key=routing_key)
