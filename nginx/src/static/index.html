@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" 
+          content="width=device-width, initial-scale=1, shrink-to-fit=no, 
+                   maximum-scale=1.0, user-scalable=0">
+    <title>ToDo or Not ToDo</title>
+    <link rel="stylesheet" href="stylesheet.css">
+</head>
+<body>
+    <h1>
+        A Todo List :>
+    </h1>
+    <p>
+        Though I rarely follow todo lists...
+    </p>
+    <form id="todo_form", action="/submit", method="POST">
+        <label for="todo">Insert Item To Do:</label>
+        <input type="text" id="todo" name="todo">
+        <input type="submit" value="Submit">
+    </form>
+
+    <div class="todo_list"></div>
+
+    <script type="text/javascript" src="helper.js"></script>
+</body>

@@ -1,0 +1,33 @@
+body {
+    font-family: 'Courier New', Courier, monospace;
+    color:black;
+    place-items: center;
+}
+
+.todo_list {
+    margin-top: 5vw;
+}
+
+.todo_item {
+    margin-top: 1vw;
+    width: 80vw;
+    display: flex;
+    justify-content: space-between;
+    background-color: aliceblue;
+}
+
+.todo_item:has(input[type="checkbox"]:checked) label {
+    text-decoration: line-through;
+    color: #888888;
+}
+
+input[type="submit"] {
+    background-color:white;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+button {
+    background-color: #cf5e4c;
+    color: white;
+    font-family: 'Courier New', Courier, monospace;
+}
