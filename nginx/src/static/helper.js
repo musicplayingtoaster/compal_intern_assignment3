@@ -22,14 +22,36 @@ ws.onclose = (event) => {
 
 ws.onmessage = (event) => { // websocket message recieved from client, updates page
     console.log(event)
-    let todo = JSON.parse(JSON.parse(event.data))
-    createTodo(todo[0], todo[1])
+    
+    let payload = JSON.parse(event.data)
+    switch(payload[1]){
+        case 'CREATE':
+            let todo = payload[0];
+            createTodo(todo[0], todo[1]);
+            break;
+        case 'LOAD':
+            let data = payload[0];
+            console.log(data);
+            data.forEach(element => {
+                createTodo(element[0], element[1], element[2]);
+            });
+            break;
+        case 'UPDATE':
+            break;
+        case 'DELETE':
+            let data = payload[0];
+            if (data == "deleted") {
+                document.getElementById(id.toString()).remove();
+            }
+            break;
+        default:
+            console.log('Unknown Action was Recieved')
+    }
 };
 
 form.addEventListener('submit', async function(event) {
     event.preventDefault();
     const formData = new FormData(this);
-    
     // for (let [key, value] of formData.entries()) {
     //     console.log(`${key}: ${value}`);
     // }
@@ -37,22 +59,18 @@ form.addEventListener('submit', async function(event) {
     let [data] = formData.entries();
     //console.log(data);
     if (data[1] != '') {
-        // await fetch('/submit', {
-        //     method: 'POST',
-        //     body: formData
-        // })
-        // .then(response => response.json())
-        // .then(data => {
-        //     console.log(data);
-        //     // createTodo(data);
-        // })
-        // .catch(error => {
-        //     console.error("Error:", error)
-        // });
-
-        console.log("about to send form through websocket", formData);
-        ws.send(JSON.stringify(Object.fromEntries(formData.entries())));
-        console.log("sent i think");
+        await fetch('/submit', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+            // createTodo(data);
+        })
+        .catch(error => {
+            console.error("Error:", error)
+        });
 
         form.reset();
     }
@@ -64,12 +82,8 @@ window.addEventListener("load", () => {
         method: 'GET'
     })
     .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        data.forEach(element => {
-            createTodo(element[0], element[1], element[2]);
-        });
-    })
+    .then(data => console.log(data))
+    .catch(error => console.error("Error:", error));
 })
 
 todo_list.addEventListener('change', function(event){
@@ -115,10 +129,6 @@ function deleteSelf(id){
         body: id,
     })
     .then(response => response.json())
-    .then(data => {
-        console.log(data);
-        if (data == "deleted") {
-            document.getElementById(id.toString()).remove();
-        }
-    })
+    .then(data => console.log(data))
+    .catch(error => console.error("Error:", error));
 }
