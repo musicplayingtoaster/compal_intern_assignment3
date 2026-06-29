@@ -22,7 +22,7 @@ ws.onclose = (event) => {
 
 ws.onmessage = (event) => { // websocket message recieved from client, updates page
     console.log(event)
-    
+
     let payload = JSON.parse(event.data)
     switch(payload[1]){
         case 'CREATE':
@@ -39,10 +39,8 @@ ws.onmessage = (event) => { // websocket message recieved from client, updates p
         case 'UPDATE':
             break;
         case 'DELETE':
-            let data = payload[0];
-            if (data == "deleted") {
-                document.getElementById(id.toString()).remove();
-            }
+            let id = payload[0];
+            document.getElementById(id.toString()).remove();
             break;
         default:
             console.log('Unknown Action was Recieved')
