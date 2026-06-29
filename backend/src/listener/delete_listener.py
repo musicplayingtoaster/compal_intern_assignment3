@@ -1,6 +1,5 @@
 import asyncio, json, aio_pika
 from ..resources import mq_keys
-from ..resources.todo_model import Todo
 from ..resources.listener import Listener, publish_to_websockets
 from ..database.database_accessor import DatabaseAccessor
 from ..database import database

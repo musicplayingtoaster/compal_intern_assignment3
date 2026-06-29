@@ -1,6 +1,5 @@
 import asyncio, json, aio_pika
 from ..resources import mq_keys
-from ..resources.todo_model import Todo
 from ..resources.listener import Listener, publish_to_websockets
 from ..database.database_accessor import DatabaseAccessor
 from ..database import database
@@ -12,7 +11,7 @@ UPDATE_KEY = mq_keys.UPDATE_KEY
 EXCHANGE = mq_keys.EXCHANGE
 
 async def process_message(message: aio_pika.IncomingMessage):
-    print("Create Listener Heard Message!")
+    print("Update Listener Heard Message!")
     async with message.process():
         try:
             payload = json.loads(message.body.decode())

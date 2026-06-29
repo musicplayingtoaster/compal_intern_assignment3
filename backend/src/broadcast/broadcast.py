@@ -1,6 +1,6 @@
 # rabbitmq listener sends stuff here
 # dedicated websocket server to push to all clients
-import asyncio, json, aio_pika
+import asyncio, aio_pika
 from ..resources import mq_keys
 from ..resources.todo_model import Todo
 from ..resources.listener import Listener
