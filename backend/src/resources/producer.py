@@ -1,7 +1,7 @@
 # Stuff to send to rabbitmq container
 # Producer helper class for main.py to use (organization purposes)
 import aio_pika
-from ..resources.connections import connection_params_rabbitmq as conn_params
+from .connections import connection_params_rabbitmq as conn_params
 from ..resources import mq_keys
 import json
 

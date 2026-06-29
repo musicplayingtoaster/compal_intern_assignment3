@@ -1,8 +1,7 @@
 # base listener and helper functions
 import aio_pika, asyncio
 from .connections import connection_params_rabbitmq as conn_params
-from . import mq_keys
-from ..producer import producer
+from . import mq_keys, producer
 
 class Listener:
     def __init__(self):

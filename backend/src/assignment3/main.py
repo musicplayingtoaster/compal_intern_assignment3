@@ -12,7 +12,7 @@ import redis
 import redis.asyncio as aioredis
 import aio_pika
 
-from ..producer import producer
+from ..resources import producer
 from ..resources import mq_keys
 
 

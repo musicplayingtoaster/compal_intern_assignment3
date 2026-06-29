@@ -4,7 +4,6 @@ from ..resources.todo_model import Todo
 from ..resources.listener import Listener, publish_to_websockets
 from ..database.database_accessor import DatabaseAccessor
 from ..database import database
-from ..resources.connections import ItWouldBeNice, connection_params_rabbitmq as conn_params
 
 # routing keys
 CREATE_KEY = mq_keys.CREATE_KEY
@@ -16,13 +15,9 @@ async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         try:
             payload = json.loads(message.body.decode())
-            
-            # send payload to websocket server then await database.add_todo?
-            # or send after to ensure parity
 
-            await database.add_todo(Todo.model_validate(payload), 
-                              ItWouldBeNice(database_accessor.get_pg_async_conn), 
-                              ItWouldBeNice(database_accessor.get_rdcache_async_conn),)
+            async with database_accessor.get_pg_async_conn as conn_db, database_accessor.get_rdcache_async_conn as conn_cache:
+                await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
             
             await publish_to_websockets((payload, CREATE_KEY))
             
@@ -36,13 +31,18 @@ async def create_listen():
     await listener.listen(key=CREATE_KEY, process_message=process_message)
         
 
-database_accessor = DatabaseAccessor(create_listen) # change this to create listen and fix stuff
+database_accessor = DatabaseAccessor(create_listen)
 
 async def main():
+    shutdown_trigger = asyncio.Event()
+
     async with database_accessor:
-        create_listen()
-        while True:
-            await asyncio.sleep(3600)
+        try:
+            await shutdown_trigger.wait()
+        except asyncio.CancelledError:
+            print("Shutdown triggered via cancellation.")
+        finally:
+            print("System shutdown complete.")
 
 if __name__ == "__main__":
     try:
