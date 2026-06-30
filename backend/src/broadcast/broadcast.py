@@ -56,10 +56,11 @@ async def create_listen():
     await listener.listen(key=WS_KEY, process_message=process_message)
 
 async def init():
+    print("initiating...")
     shutdown_trigger = asyncio.Event()
     
     global _websocket_manager 
-    _websocket_manager = WebSocketBroadcastServer(host="localhost", port=8765)
+    _websocket_manager = WebSocketBroadcastServer(host="0.0.0.0", port=8765)
     await _websocket_manager.start()
     print(f"WebSocket server started on ws://{_websocket_manager.host}:{_websocket_manager.port}")
 
