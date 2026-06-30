@@ -16,19 +16,7 @@ dependencies = [
 
 [project.scripts]
 assignment3 = "src.assignment3.main:main"
-create_listener = "src.listener.create_listener:main"
-load_listener = "src.listener.load_listener:main"
-update_listener = "src.listener.update_listener:main"
-delete_listener = "src.listener.delete_listener:main"
-websocket_broadcaster = "src.broadcast.broadcast:main"
 
 [build-system]
 requires = ["uv_build>=0.11.20,<0.12.0"]
 build-backend = "uv_build"
-
-[tool.uv]
-package = true
-
-[tool.uv_build]
-source-dir = "."
-packages = ["src"]

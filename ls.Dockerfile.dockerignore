@@ -1,15 +1,15 @@
-.venv
-.uv
-__pycache__
+**/.venv
+**/.uv
+**/__pycache__
 *.pyc
 secrets
 init-db
 .gitignore
-Dockerfile
+**/Dockerfile
 .git
 compose.yaml
 *.env
 
 # Unneccessary Services/Resources
-assignment3
-broadcast
+**/assignment3
+**/broadcast
