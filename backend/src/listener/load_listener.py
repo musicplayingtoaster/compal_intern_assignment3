@@ -1,4 +1,4 @@
-import asyncio, aio_pika
+import asyncio, aio_pika, signal
 from ..resources import mq_keys
 from ..resources.listener import Listener, publish_to_websockets
 from ..database.database_accessor import DatabaseAccessor
@@ -36,8 +36,16 @@ async def load_listen():
 database_accessor = DatabaseAccessor(load_listen)
 
 async def init():
-    print("Init called!")
     shutdown_trigger = asyncio.Event()
+
+    loop = asyncio.get_event_loop()
+
+    def helper_stop_signal():
+        print("Received shutdown signal from Docker...")
+        shutdown_trigger.set()
+
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, helper_stop_signal)
 
     async with database_accessor:
         try:
@@ -47,10 +55,8 @@ async def init():
         finally:
             print("System shutdown complete.")
 
-def main() -> None:
-    print("Main Called!")
-    try:
-        print("Attempting to start Asyncio")
-        asyncio.run(init())
-    except KeyboardInterrupt:
-        print("Stopped by user.")
+def main():
+    asyncio.run(init())
+
+if __name__ == "__main__":
+    main()

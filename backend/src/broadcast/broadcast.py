@@ -1,6 +1,6 @@
 # rabbitmq listener sends stuff here
 # dedicated websocket server to push to all clients
-import asyncio, aio_pika, websockets
+import asyncio, aio_pika, websockets, signal
 from ..resources import mq_keys
 from ..resources.listener import Listener
 
@@ -65,6 +65,16 @@ async def init():
 
     rabbitmq_task = asyncio.create_task(create_listen())
 
+    loop = asyncio.get_event_loop()
+
+    def helper_stop_signal():
+        print("Received shutdown signal from Docker...")
+        shutdown_trigger.set()
+
+    for sig in (signal.SIGTERM, signal.SIGINT):
+        loop.add_signal_handler(sig, helper_stop_signal)
+
+
     try:
         await shutdown_trigger.wait()
     finally:
@@ -75,7 +85,7 @@ async def init():
         
 
 def main():
-    try:
-        asyncio.run(init())
-    except KeyboardInterrupt:
-        print("Stopped by user.")
+    asyncio.run(init())
+
+if __name__ == "__main__":
+    main()
