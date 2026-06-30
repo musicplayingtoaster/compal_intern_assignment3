@@ -36,6 +36,7 @@ async def create_listen():
 database_accessor = DatabaseAccessor(create_listen)
 
 async def init():
+    print("Init called!")
     shutdown_trigger = asyncio.Event()
 
     async with database_accessor:
@@ -46,8 +47,10 @@ async def init():
         finally:
             print("System shutdown complete.")
 
-def main():
+def main() -> None:
+    print("Main Called!")
     try:
+        print("Attempting to start Asyncio")
         asyncio.run(init())
     except KeyboardInterrupt:
         print("Stopped by user.")
