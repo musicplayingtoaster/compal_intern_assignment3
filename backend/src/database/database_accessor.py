@@ -3,7 +3,7 @@ from typing import AsyncGenerator, Generator
 from psycopg import Connection, AsyncConnection
 from psycopg_pool import ConnectionPool, AsyncConnectionPool
 import redis, redis.asyncio as aioredis
-from ..resources.connections import connection_params_db, connection_params_redis_cache
+from resources.connections import connection_params_db, connection_params_redis_cache
 
 from contextlib import contextmanager, asynccontextmanager
 
