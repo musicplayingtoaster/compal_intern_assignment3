@@ -1,0 +1,16 @@
+.venv
+.uv
+__pycache__
+*.pyc
+secrets
+init-db
+.gitignore
+Dockerfile
+.git
+compose.yaml
+*.env
+
+# Unneccessary Services/Resources
+assignment3
+database
+listener

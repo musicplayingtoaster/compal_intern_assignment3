@@ -1,0 +1,272 @@
+services:
+  nginx-proxy:
+    image: nginx:latest
+    container_name: nginx-proxy
+    ports:
+      - "3000:3000"
+    networks:
+      - todo-app-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/src:/usr/share/nginx/html:ro
+    depends_on:
+      app-1:
+        condition: service_healthy
+      app-2:
+        condition: service_healthy
+      websocket-server:
+        condition: service_healthy
+
+
+  app-1:
+    build:
+      context: .
+      dockerfile: backend/api.Dockerfile
+    container_name: app-1
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - UV_HTTP_TIMEOUT=60
+    ports:
+      - "8000:8000"
+    networks:
+      - todo-app-network
+    healthcheck:
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=2)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  app-2:
+    build: 
+      context: .
+      dockerfile: backend/api.Dockerfile
+    container_name: app-2
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - UV_HTTP_TIMEOUT=60
+    ports:
+      - "8080:8000"
+    networks:
+      - todo-app-network
+    healthcheck:
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=2)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: postgres-db
+    restart: always
+    env_file:
+      - path: ./.env/pgdb-init.env
+        required: true
+    ports:
+      - "5432:5432"
+    networks:
+      - todo-app-network
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - type: bind
+        source: ./init-db/
+        target: /docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL","pg_isready -U db-user -d todo-list-db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    command: [
+      "postgres",
+      "-c", "log_statement=all",
+      "-c", "log_connections=on",
+      "-c", "log_disconnections=on",
+      "-c", "log_duration=on",
+    ]
+
+
+  redis-cache:
+    image: redis:alpine3.23
+    container_name: redis-cache
+    restart: always
+    ports:
+      - "127.0.0.1:6379:6379"
+    networks:
+      - todo-app-network
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - rdcdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+
+  rabbitmq:
+    image: rabbitmq:4-management-alpine
+    container_name: rabbitmq
+    restart: always
+    ports:
+      - "5672:5672"
+    networks:
+      - todo-app-network
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+      - rabbitmq_logs:/var/log/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+
+  create-listener-server:
+    build:
+      context: .
+      dockerfile: backend/ls.Dockerfile
+    container_name: create-listener
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - PYTHONBUFFERED=1
+      - PYTHONPATH=/app:/app/src
+    command: [".venv/bin/python", "-m", "src.listener.create_listener"]
+    ports:
+      - "9000:8000"
+    networks:
+      - todo-app-network
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  load-listener-server:
+    build:
+      context: .
+      dockerfile: backend/ls.Dockerfile
+    container_name: load-listener
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - PYTHONBUFFERED=1
+      - PYTHONPATH=/app:/app/src
+    command: [".venv/bin/python", "-m", "src.listener.load_listener"]
+    ports:
+      - "9010:8000"
+    networks:
+      - todo-app-network
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  update-listener-server:
+    build:
+      context: .
+      dockerfile: backend/ls.Dockerfile
+    container_name: update-listener
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - PYTHONBUFFERED=1
+      - PYTHONPATH=/app:/app/src
+    command: [".venv/bin/python", "-m", "src.listener.update_listener"]
+    ports:
+      - "9020:8000"
+    networks:
+      - todo-app-network
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  delete-listener-server:
+    build:
+      context: .
+      dockerfile: backend/ls.Dockerfile
+    container_name: delete-listener
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - PYTHONBUFFERED=1
+      - PYTHONPATH=/app:/app/src
+    command: [".venv/bin/python", "-m", "src.listener.delete_listener"]
+    ports:
+      - "9030:8000"
+    networks:
+      - todo-app-network
+    depends_on:
+      postgres-db:
+        condition: service_healthy
+      redis-cache:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  websocket-server:
+    build:
+      context: .
+      dockerfile: backend/ws.Dockerfile
+    container_name: websocket-server
+    env_file:
+      - path: ./.env/client-init.env
+        required: true
+    environment:
+      - PYTHONBUFFERED=1
+      - PYTHONPATH=/app:/app/src
+    ports:
+      - "8765:8765"
+    networks:
+      - todo-app-network
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+
+
+networks:
+  todo-app-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  rdcdata:
+  rabbitmq_data:
+  rabbitmq_logs:
