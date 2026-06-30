@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [project.scripts]
-assignment3 = "src.assignment3.main:main"
+assignment3 = "assignment3.main:main"
 
 [build-system]
 requires = ["uv_build>=0.11.20,<0.12.0"]
