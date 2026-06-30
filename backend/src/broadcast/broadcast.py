@@ -57,7 +57,7 @@ async def create_listen():
     listener = Listener()
     await listener.listen(key=WS_KEY, process_message=process_message)
 
-async def startup():
+async def init():
     shutdown_trigger = asyncio.Event()
     
     global _websocket_manager 
@@ -78,6 +78,6 @@ async def startup():
 
 def main():
     try:
-        asyncio.run(startup())
+        asyncio.run(init())
     except KeyboardInterrupt:
         print("Stopped by user.")
