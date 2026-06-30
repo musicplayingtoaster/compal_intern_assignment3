@@ -12,4 +12,4 @@ COPY backend/pyproject.toml backend/uv.lock ./
 
 COPY /backend/src/ ./src/
 
-RUN uv sync --frozen --no-editable
+RUN uv sync --frozen --no-install-project

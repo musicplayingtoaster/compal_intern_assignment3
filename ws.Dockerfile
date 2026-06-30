@@ -12,7 +12,7 @@ COPY backend/pyproject.toml backend/uv.lock ./
 
 COPY /backend/src/ ./src/
 
-RUN uv sync --frozen --no-editable
+RUN uv sync --frozen --no-install-project
 
 CMD [".venv/bin/python", "-m", "src.broadcast.broadcast"]
 

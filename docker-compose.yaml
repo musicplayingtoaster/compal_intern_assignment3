@@ -21,7 +21,7 @@ services:
   app-1:
     build:
       context: .
-      dockerfile: backend/api.Dockerfile
+      dockerfile: api.Dockerfile
     container_name: app-1
     env_file:
       - path: ./.env/client-init.env
@@ -48,7 +48,7 @@ services:
   app-2:
     build: 
       context: .
-      dockerfile: backend/api.Dockerfile
+      dockerfile: api.Dockerfile
     container_name: app-2
     env_file:
       - path: ./.env/client-init.env
@@ -143,7 +143,7 @@ services:
   create-listener-server:
     build:
       context: .
-      dockerfile: backend/ls.Dockerfile
+      dockerfile: ls.Dockerfile
     container_name: create-listener
     env_file:
       - path: ./.env/client-init.env
@@ -167,7 +167,7 @@ services:
   load-listener-server:
     build:
       context: .
-      dockerfile: backend/ls.Dockerfile
+      dockerfile: ls.Dockerfile
     container_name: load-listener
     env_file:
       - path: ./.env/client-init.env
@@ -191,7 +191,7 @@ services:
   update-listener-server:
     build:
       context: .
-      dockerfile: backend/ls.Dockerfile
+      dockerfile: ls.Dockerfile
     container_name: update-listener
     env_file:
       - path: ./.env/client-init.env
@@ -215,7 +215,7 @@ services:
   delete-listener-server:
     build:
       context: .
-      dockerfile: backend/ls.Dockerfile
+      dockerfile: ls.Dockerfile
     container_name: delete-listener
     env_file:
       - path: ./.env/client-init.env
@@ -239,7 +239,7 @@ services:
   websocket-server:
     build:
       context: .
-      dockerfile: backend/ws.Dockerfile
+      dockerfile: ws.Dockerfile
     container_name: websocket-server
     env_file:
       - path: ./.env/client-init.env
