@@ -1,8 +1,8 @@
 import asyncio, json, aio_pika, signal
-from resources import mq_keys
-from resources.listener import Listener, publish_to_websockets
-from database.database_accessor import DatabaseAccessor
-from database import database
+from ..resources import mq_keys
+from ..resources.listener import Listener, publish_to_websockets
+from ..database.database_accessor import DatabaseAccessor
+from ..database import database
 
 # routing keys
 UPDATE_KEY = mq_keys.UPDATE_KEY
@@ -28,19 +28,19 @@ async def process_message(message: aio_pika.IncomingMessage):
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
 
-async def create_listen():
-    print("Create_Listener attempting to connect to RabbitMQ")
+async def update_listen():
+    print("Update_Listener attempting to connect to RabbitMQ")
     listener = Listener()
     await listener.listen(key=UPDATE_KEY, process_message=process_message)
         
 
-database_accessor = DatabaseAccessor(create_listen)
+database_accessor = DatabaseAccessor(update_listen)
 
 async def init():
     shutdown_trigger = asyncio.Event()
 
     loop = asyncio.get_event_loop()
-    
+
     def helper_stop_signal():
         print("Received shutdown signal from Docker...")
         shutdown_trigger.set()

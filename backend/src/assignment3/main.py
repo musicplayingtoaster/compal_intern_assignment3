@@ -2,9 +2,9 @@ from typing import Annotated
 from fastapi import FastAPI, Body, Form
 import uvicorn
 
-from resources.todo_model import Todo
-from resources import producer
-from resources import mq_keys
+from ..resources.todo_model import Todo
+from ..resources import producer
+from ..resources import mq_keys
 
 app = FastAPI()
 

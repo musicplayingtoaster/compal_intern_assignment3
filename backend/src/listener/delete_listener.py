@@ -1,8 +1,8 @@
 import asyncio, json, aio_pika
-from resources import mq_keys
-from resources.listener import Listener, publish_to_websockets
-from database.database_accessor import DatabaseAccessor
-from database import database
+from ..resources import mq_keys
+from ..resources.listener import Listener, publish_to_websockets
+from ..database.database_accessor import DatabaseAccessor
+from ..database import database
 
 # routing keys
 DELETE_KEY = mq_keys.DELETE_KEY
@@ -27,13 +27,13 @@ async def process_message(message: aio_pika.IncomingMessage):
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
 
-async def create_listen():
-    print("Create_Listener attempting to connect to RabbitMQ")
+async def delete_listen():
+    print("Delete_Listener attempting to connect to RabbitMQ")
     listener = Listener()
     await listener.listen(key=DELETE_KEY, process_message=process_message)
         
 
-database_accessor = DatabaseAccessor(create_listen)
+database_accessor = DatabaseAccessor(delete_listen)
 
 async def init():
     shutdown_trigger = asyncio.Event()

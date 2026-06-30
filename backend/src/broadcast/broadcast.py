@@ -1,10 +1,8 @@
 # rabbitmq listener sends stuff here
 # dedicated websocket server to push to all clients
-import asyncio, aio_pika
-from resources import mq_keys
-from resources.todo_model import Todo
-from resources.listener import Listener
-import websockets
+import asyncio, aio_pika, websockets
+from ..resources import mq_keys
+from ..resources.listener import Listener
 
 # routing keys
 WS_KEY = mq_keys.WS_KEY

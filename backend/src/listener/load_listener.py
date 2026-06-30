@@ -1,8 +1,8 @@
 import asyncio, aio_pika
-from resources import mq_keys
-from resources.listener import Listener, publish_to_websockets
-from database.database_accessor import DatabaseAccessor
-from database import database
+from ..resources import mq_keys
+from ..resources.listener import Listener, publish_to_websockets
+from ..database.database_accessor import DatabaseAccessor
+from ..database import database
 
 # routing keys
 LOAD_KEY = mq_keys.LOAD_KEY
@@ -27,13 +27,13 @@ async def process_message(message: aio_pika.IncomingMessage):
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
 
-async def create_listen():
-    print("Create_Listener attempting to connect to RabbitMQ")
+async def load_listen():
+    print("Load_Listener attempting to connect to RabbitMQ")
     listener = Listener()
     await listener.listen(key=LOAD_KEY, process_message=process_message)
         
 
-database_accessor = DatabaseAccessor(create_listen)
+database_accessor = DatabaseAccessor(load_listen)
 
 async def init():
     print("Init called!")
