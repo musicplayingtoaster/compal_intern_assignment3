@@ -1,4 +1,4 @@
-from ..resources.todo_model import Todo
+from resources.todo_model import Todo
 import psycopg
 from psycopg import Connection, AsyncConnection
 import redis

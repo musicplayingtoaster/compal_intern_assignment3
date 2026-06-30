@@ -1,8 +1,8 @@
 import asyncio, json, aio_pika
-from ..resources import mq_keys
-from ..resources.listener import Listener, publish_to_websockets
-from ..database.database_accessor import DatabaseAccessor
-from ..database import database
+from resources import mq_keys
+from resources.listener import Listener, publish_to_websockets
+from database.database_accessor import DatabaseAccessor
+from database import database
 
 # routing keys
 DELETE_KEY = mq_keys.DELETE_KEY
