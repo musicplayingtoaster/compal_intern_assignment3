@@ -2,7 +2,7 @@
 # Producer helper class for main.py to use (organization purposes)
 import aio_pika
 from .connections import connection_params_rabbitmq as conn_params
-from ..resources import mq_keys
+from . import mq_keys
 import json
 
 # exchange name
