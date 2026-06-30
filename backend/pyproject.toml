@@ -25,3 +25,13 @@ websocket_broadcaster = "src.broadcast.broadcast:main"
 [build-system]
 requires = ["uv_build>=0.11.20,<0.12.0"]
 build-backend = "uv_build"
+
+[tool.uv]
+package = true
+
+[tool.uv_build]
+packages = [
+    "src/assignment3",
+    "src/listener",
+    "src/broadcast"
+]
