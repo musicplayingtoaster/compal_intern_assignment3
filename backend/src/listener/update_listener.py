@@ -39,7 +39,8 @@ database_accessor = DatabaseAccessor(create_listen)
 async def init():
     shutdown_trigger = asyncio.Event()
 
-    loop = asyncio.get_running_loop()
+    loop = asyncio.get_event_loop()
+    
     def helper_stop_signal():
         print("Received shutdown signal from Docker...")
         shutdown_trigger.set()
@@ -57,3 +58,6 @@ async def init():
 
 def main():
     asyncio.run(init())
+
+if __name__ == "__main__":
+    main()
