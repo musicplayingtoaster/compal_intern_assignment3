@@ -29,9 +29,9 @@ latest_cache_key:str = None
 # }
 
 def init_todo_list(conn_db: Connection) -> None:
-    try:
-        #with helper.get_pg_sync_conn() as connection_db:
-        with conn_db.cursor() as cursor:
+    with conn_db.cursor() as cursor:
+        cursor.execute("SELECT pg_advisory_lock(8675309);")
+        try:
             cursor.execute('''
                 CREATE TABLE IF NOT EXISTS todo_list (
                     id SERIAL PRIMARY KEY,
@@ -39,8 +39,10 @@ def init_todo_list(conn_db: Connection) -> None:
                     resolved INTEGER NOT NULL DEFAULT 0
                 )
             ''')
-    except psycopg.OperationalError as e:
-        print("Failed to open database:", e, "(in short, you failed lmao.)")
+        except psycopg.OperationalError as e:
+            print("Failed to open database:", e, "(in short, you failed lmao.)")
+        finally:
+            cursor.execute("SELECT pg_advisory_unlock(8675309);")
 
 
 async def retrieve_latest_todo(conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
