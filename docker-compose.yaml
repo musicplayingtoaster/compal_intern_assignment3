@@ -211,7 +211,7 @@ services:
     env_file:
       - path: ./.env/client-init.env
         required: true
-    command: ["uv", "run", "delete-listener"]
+    command: ["uv", "run", "delete_listener"]
     ports:
       - "9030:8000"
     networks:
