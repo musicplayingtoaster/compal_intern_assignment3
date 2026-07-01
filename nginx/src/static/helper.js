@@ -59,7 +59,7 @@ form.addEventListener('submit', async function(event) {
     let [data] = formData.entries();
     //console.log(data);
     if (data[1] != '') {
-        await fetch('/submit', {
+        await fetch('api/submit', {
             method: 'POST',
             body: formData
         })
@@ -78,7 +78,7 @@ form.addEventListener('submit', async function(event) {
 
 window.addEventListener("load", () => {
     console.log("page loaded! attempting to get database stuff...")
-    fetch('/load', {
+    fetch('api/load', {
         method: 'GET'
     })
     .then(response => response.json())
@@ -89,7 +89,7 @@ window.addEventListener("load", () => {
 todo_list.addEventListener('change', function(event){
     if (event.target && event.target.type === 'checkbox') {
         const checkbox = event.target;
-        fetch('/update', {
+        fetch('api/update', {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -124,7 +124,7 @@ function createTodo(id, todo, resolved = 0) {
 
 function deleteSelf(id){
     console.log("self removal.", id)
-    fetch('/delete', {
+    fetch('api/delete', {
         method: 'DELETE',
         body: id,
     })

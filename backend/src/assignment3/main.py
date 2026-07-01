@@ -6,7 +6,13 @@ from resources.todo_model import Todo
 from resources import producer
 from resources import mq_keys
 
-app = FastAPI()
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    producer.init_publisher()
+
+app = FastAPI(lifespan=lifespan)
 
 @app.post("/submit")
 async def create_todo(data: Annotated[Todo, Form()]):
@@ -39,9 +45,8 @@ async def health():
     print("Open!")
 
 def main() -> None:
-#    database.init_todo_list()
-    producer.init_publisher()
-    # database.init_todo_list()
+#   database.init_todo_list()
+#   database.init_todo_list()
     uvicorn.run(app, host="0.0.0.0", port=8000) 
 
 if __name__ == "__main__":
