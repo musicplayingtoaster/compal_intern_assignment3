@@ -33,7 +33,7 @@ services:
     networks:
       - todo-app-network
     healthcheck:
-      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=2)"]
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
       interval: 30s
       timeout: 5s
       retries: 3
@@ -60,7 +60,7 @@ services:
     networks:
       - todo-app-network
     healthcheck:
-      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/', timeout=2)"]
+      test: ["CMD","python","-c","import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)"]
       interval: 30s
       timeout: 5s
       retries: 3

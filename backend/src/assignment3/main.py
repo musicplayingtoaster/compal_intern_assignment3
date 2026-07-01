@@ -34,7 +34,7 @@ async def update_todo(data: Todo):
 # # also you can't put this in main() ig... weird...
 # app.mount("/", StaticFiles(directory="src/assignment2/static", html=True), name="static")
 
-@app.get("/")
+@app.get("/health")
 async def health():
     print("Open!")
 
