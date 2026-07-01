@@ -1,6 +1,5 @@
 # connection paramters
 import os
-from typing import Dict, Callable, Any
 
 connection_params_db = {
     "host": os.environ.get('DB_HOST'), 
@@ -21,3 +20,9 @@ connection_params_rabbitmq = {
     "host": os.environ.get('RBMQ_HOST'),
     "port": int(os.environ.get('RBMQ_PORT')),
 }
+
+# testing purposes
+# connection_params_rabbitmq = {
+#     "host": "localhost",
+#     "port": 5672,
+# }
