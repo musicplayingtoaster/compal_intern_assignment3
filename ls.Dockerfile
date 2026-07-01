@@ -9,7 +9,8 @@ ENV UV_COMPILE_BYTECODE=1 \
     PYTHONUNBUFFERED=1
 
 COPY backend/pyproject.toml backend/uv.lock ./
-
-COPY /backend/src/ ./src/
-
 RUN uv sync --frozen --no-install-project
+
+COPY backend/src/listener ./src/listener
+COPY backend/src/resources ./src/resources
+COPY backend/src/database ./src/database

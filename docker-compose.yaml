@@ -151,7 +151,7 @@ services:
     environment:
       - PYTHONBUFFERED=1
       - PYTHONPATH=/app:/app/src
-    command: [".venv/bin/python", "-m", "src.listener.create_listener"]
+    command: ["uv", "run", "create_listener"]
     ports:
       - "9000:8000"
     networks:
