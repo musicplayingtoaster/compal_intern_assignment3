@@ -104,7 +104,7 @@ def create_lifespan(rabbitmq_listener):
         rediscache_sync_client = redis.Redis(connection_pool=sync_pool)
         rediscache_async_client = aioredis.Redis(connection_pool=async_pool)
 
-        with get_pg_sync_conn() as sync_conn:
+        with next(get_pg_sync_conn()) as sync_conn:
             database.init_todo_list(conn_db=sync_conn)
         listener_task = asyncio.create_task(rabbitmq_listener())
 
