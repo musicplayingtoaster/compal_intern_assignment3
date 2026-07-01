@@ -19,10 +19,10 @@ async def process_message(message: aio_pika.IncomingMessage):
     print("Create Listener Heard Message!")
     async with message.process():
         try:
-            payload = json.loads(message.body.decode())
+            payload = message.body.decode()
 
             async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn as conn_cache:
-                await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
+                await database.add_todo(todo=Todo.model_validate_json(payload), conn_db=conn_db, conn_cache=conn_cache)
                 print("Added to Database!")
             
             await publish_to_websockets((payload, CREATE_KEY))

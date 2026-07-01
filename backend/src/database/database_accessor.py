@@ -109,7 +109,9 @@ def create_lifespan(rabbitmq_listener):
 
         with next(get_pg_sync_conn()) as sync_conn:
             database.init_todo_list(conn_db=sync_conn)
+            print("Database Initizalization Attempted!")
         listener_task = asyncio.create_task(rabbitmq_listener())
+        print("Listener task started!")
 
         yield
 
