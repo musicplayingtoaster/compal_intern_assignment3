@@ -11,5 +11,5 @@ compose.yaml
 *.env
 
 # Unneccessary Services/Resources
-**/assignment3
+# **/assignment3
 **/broadcast
