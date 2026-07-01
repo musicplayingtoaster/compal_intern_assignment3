@@ -8,6 +8,7 @@ class Listener:
         self.conn_params = conn_params
         self.connection = None
         self.channel = None
+        self.exchange = None
         self.queue = None
     
     async def connect(self):
@@ -24,7 +25,11 @@ class Listener:
         await self.channel.set_qos(prefetch_count=1) # limits number of unack messages to 1
         print("Channel Created!")
 
-        print("Awaiting Queue...")
+        print("Declaring Exchange...")
+        self.exchange = await self.channel.declare_exchange(mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
+        print("Exchange Declared!")
+
+        print("Declaring Queue...")
         self.queue = await self.channel.declare_queue(key, durable=True)
         print("Queue Declared! Starting to Consume Messages...")
 
