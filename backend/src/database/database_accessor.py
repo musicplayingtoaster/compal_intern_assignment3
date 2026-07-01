@@ -90,7 +90,7 @@ postgres_async_pool: AsyncConnectionPool = None
 rediscache_sync_client: redis.Redis | None = None
 rediscache_async_client: aioredis.Redis | None = None
 
-def create_lifespan(app:FastAPI, rabbitmq_listener):
+def create_lifespan(rabbitmq_listener, app:FastAPI = None):
     print("create lifespan called!")
 
     @asynccontextmanager
