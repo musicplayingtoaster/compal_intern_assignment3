@@ -14,15 +14,22 @@ class Listener:
 
     async def listen(self, key, process_message):
         if not self.connection:
+            print("Attempting to Connect to RabbitMQ")
             await self.connect()
+            print("Connected!")
 
         async with self.connection:
+            print("Getting Channel...")
             channel = await self.connection.channel()
             await channel.set_qos(prefetch_count=1) # limits number of unack messages to 1
+            print("Channel Created!")
 
+            print("Awaiting Queue...")
             self.queue = await channel.declare_queue(key, durable=True)
+            print("Queue Declared! Starting to Consume Messages...")
 
             await self.queue.consume(process_message)
+            print("Consuming Started!")
 
             await asyncio.Future()
     
