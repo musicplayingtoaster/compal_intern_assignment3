@@ -4,9 +4,8 @@ from resources.todo_model import Todo
 from resources.listener import Listener, publish_to_websockets
 from database import database_accessor
 from database import database
-from fastapi import FastAPI, Depends
-from psycopg import AsyncConnection
-import redis.asyncio as aioredis
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 # routing keys
 CREATE_KEY = mq_keys.CREATE_KEY
@@ -14,16 +13,17 @@ CREATE_KEY = mq_keys.CREATE_KEY
 # exchange name
 EXCHANGE = mq_keys.EXCHANGE
 
-async def process_message(message: aio_pika.IncomingMessage,
-                          conn_db: AsyncConnection = Depends(database_accessor.get_pg_async_conn),
-                          conn_cache: aioredis.Redis = Depends(database_accessor.get_rdcache_async_conn)):
+async_db_context = asynccontextmanager(database_accessor.get_pg_async_conn)
+
+async def process_message(message: aio_pika.IncomingMessage):
     print("Create Listener Heard Message!")
     async with message.process():
         try:
             payload = json.loads(message.body.decode())
 
-            await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
-            print("Added to Database!")
+            async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn as conn_cache:
+                await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
+                print("Added to Database!")
             
             await publish_to_websockets((payload, CREATE_KEY))
             print("Published to Websockets!")

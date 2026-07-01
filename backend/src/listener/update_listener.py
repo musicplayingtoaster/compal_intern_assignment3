@@ -1,11 +1,10 @@
-import asyncio, json, aio_pika, signal, uvicorn
+import asyncio, json, aio_pika, uvicorn
 from resources import mq_keys
 from resources.listener import Listener, publish_to_websockets
 from database import database_accessor
 from database import database
-from fastapi import FastAPI, Depends
-from psycopg import AsyncConnection
-import redis.asyncio as aioredis
+from fastapi import FastAPI
+from contextlib import asynccontextmanager
 
 # routing keys
 UPDATE_KEY = mq_keys.UPDATE_KEY
@@ -13,16 +12,17 @@ UPDATE_KEY = mq_keys.UPDATE_KEY
 # exchange name
 EXCHANGE = mq_keys.EXCHANGE
 
-async def process_message(message: aio_pika.IncomingMessage, 
-                          conn_db: AsyncConnection = Depends(database_accessor.get_pg_async_conn),
-                          conn_cache: aioredis.Redis = Depends(database_accessor.get_rdcache_async_conn)):
+async_db_context = asynccontextmanager(database_accessor.get_pg_async_conn)
+
+async def process_message(message: aio_pika.IncomingMessage):
     print("Update Listener Heard Message!")
     async with message.process():
         try:
             payload = json.loads(message.body.decode())
-
-            await database.update_todo(primary_key=payload[0], resolved=payload[1], conn_db=conn_db, conn_cache=conn_cache)
-            print("Updated Todo in Database!")
+            
+            async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn as conn_cache:
+                await database.update_todo(primary_key=payload[0], resolved=payload[1], conn_db=conn_db, conn_cache=conn_cache)
+                print("Updated Todo in Database!")
             
             # returns the primary key and resolved used to allow js to update
             await publish_to_websockets((payload, UPDATE_KEY)) 
