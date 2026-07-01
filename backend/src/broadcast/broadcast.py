@@ -120,7 +120,7 @@ async def handle_websockets(websocket:WebSocket):
 
 def main():
     # asyncio.run(init())
-    uvicorn.run(app)
+    uvicorn.run(app, host="0.0.0.0", port=8765)
     
 if __name__ == "__main__":
     main()
