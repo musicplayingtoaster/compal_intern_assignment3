@@ -7,37 +7,37 @@ class Listener:
     def __init__(self):
         self.conn_params = conn_params
         self.connection = None
+        self.channel = None
         self.queue = None
     
     async def connect(self):
-        self.connection = await aio_pika.connect_robust(**self.conn_params)
-
-    async def listen(self, key, process_message):
         if not self.connection:
             print("Attempting to Connect to RabbitMQ")
-            await self.connect()
+            self.connection = await aio_pika.connect_robust(**self.conn_params)
             print("Connected!")
 
-        async with self.connection:
-            print("Getting Channel...")
-            channel = await self.connection.channel()
-            await channel.set_qos(prefetch_count=1) # limits number of unack messages to 1
-            print("Channel Created!")
+    async def listen(self, key, process_message):
+        await self.connect()
+        
+        print("Getting Channel...")
+        self.channel = await self.connection.channel()
+        await self.channel.set_qos(prefetch_count=1) # limits number of unack messages to 1
+        print("Channel Created!")
 
-            print("Awaiting Queue...")
-            self.queue = await channel.declare_queue(key, durable=True)
-            print("Queue Declared! Starting to Consume Messages...")
+        print("Awaiting Queue...")
+        self.queue = await self.channel.declare_queue(key, durable=True)
+        print("Queue Declared! Starting to Consume Messages...")
 
-            await self.queue.consume(process_message)
-            print("Consuming Started!")
+        await self.queue.consume(process_message)
+        print("Consuming Started!")
 
-            try:
-                while True:
-                    await asyncio.sleep(1)
-            except asyncio.CancelledError:
-                print("Listener stopped.")
-                await self.channel.close()
-                await self.connection.close()
+        try:
+            while True:
+                await asyncio.sleep(1)
+        except asyncio.CancelledError:
+            print("Listener stopped.")
+            await self.channel.close()
+            await self.connection.close()
     
 
 # helper function for listeners
