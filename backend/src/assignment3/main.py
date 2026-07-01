@@ -49,6 +49,7 @@ async def health():
 def main() -> None:
 #   database.init_todo_list()
 #   database.init_todo_list()
+    print("Running Main.py")
     uvicorn.run(app, host="0.0.0.0", port=8000) 
 
 if __name__ == "__main__":
