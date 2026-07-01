@@ -94,7 +94,7 @@ def create_lifespan(rabbitmq_listener, app:FastAPI = None):
     print("create lifespan called!")
 
     @asynccontextmanager
-    async def lifespan():
+    async def lifespan(app:FastAPI):
         print("lifespan stuff started!")
         global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
         postgres_sync_pool = ConnectionPool(kwargs=connection_params_db, open=False)
