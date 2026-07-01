@@ -25,3 +25,7 @@ async def init_publisher():
 async def publish(routing_key, data = None):
     await _pub_exchange.publish(message=aio_pika.Message(body=json.dumps(data).encode()), 
                                 routing_key=routing_key)
+
+async def close_publisher():
+    global _pub_connection
+    _pub_connection.close()

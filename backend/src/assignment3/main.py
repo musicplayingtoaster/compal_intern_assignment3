@@ -10,7 +10,9 @@ from contextlib import asynccontextmanager
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    producer.init_publisher()
+    await producer.init_publisher()
+    yield
+    await producer.close_publisher()
 
 app = FastAPI(lifespan=lifespan)
 
