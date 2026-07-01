@@ -42,7 +42,7 @@ app = FastAPI(lifespan=database_accessor.lifespan)
 
 def main():
     # asyncio.run(init())
-    uvicorn.run(app, lifespan="on")
+    uvicorn.run(app)
 
 if __name__ == "__main__":
     main()
