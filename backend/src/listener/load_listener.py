@@ -1,4 +1,4 @@
-import asyncio, aio_pika, uvicorn
+import asyncio, aio_pika, uvicorn, logging
 from resources import mq_keys
 from resources.listener import Listener, publish_to_websockets
 from database import database_accessor 
@@ -11,6 +11,8 @@ LOAD_KEY = mq_keys.LOAD_KEY
 
 # exchange name
 EXCHANGE = mq_keys.EXCHANGE
+
+logger = logging.getLogger("uvicorn.error")
 
 async_db_context = asynccontextmanager(database_accessor.get_pg_async_conn)
 
@@ -32,11 +34,12 @@ async def process_message(message: aio_pika.IncomingMessage):
 
 async def load_listen():
     print("Load_Listener attempting to connect to RabbitMQ")
+    logger.info("Load_Listener attempting to connect to RabbitMQ")
     listener = Listener()
     await listener.listen(key=LOAD_KEY, process_message=process_message)
         
 # app = FastAPI(lifespan=database_accessor.create_lifespan(load_listen))
-app = FastAPI(lifespan=database_accessor.lifespan)
+app = FastAPI(lifespan=database_accessor.create_lifespan(load_listen))
 
 def main():
     # asyncio.run(init())

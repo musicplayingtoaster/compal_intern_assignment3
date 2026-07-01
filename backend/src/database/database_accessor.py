@@ -1,4 +1,4 @@
-import asyncio, sys
+import asyncio, sys, logging
 from typing import AsyncGenerator, Generator
 from psycopg import Connection, AsyncConnection
 from psycopg_pool import ConnectionPool, AsyncConnectionPool
@@ -9,70 +9,71 @@ from . import database
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-import logging
-
 postgres_sync_pool: ConnectionPool = None
 postgres_async_pool: AsyncConnectionPool = None
 rediscache_sync_client: redis.Redis | None = None
 rediscache_async_client: aioredis.Redis | None = None
 
-# def create_lifespan(rabbitmq_listener):
-
 logger = logging.getLogger("uvicorn.error")
 
-@asynccontextmanager
-async def lifespan(app:FastAPI):
-    print("lifespan stuff started!", flush=True)
-    sys.stdout.flush()
 
-    try:
-        global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
-        postgres_sync_pool = ConnectionPool(kwargs=connection_params_db, open=False)
-        postgres_async_pool = AsyncConnectionPool(kwargs=connection_params_db, open=False)
+def create_lifespan(rabbitmq_listener):
+    logger.info("Starting [create_lifespan] function")
+
+    @asynccontextmanager
+    async def lifespan(app:FastAPI):
+        print("lifespan stuff started!", flush=True)
+        sys.stdout.flush()
+
+        try:
+            global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
+            postgres_sync_pool = ConnectionPool(kwargs=connection_params_db, open=False)
+            postgres_async_pool = AsyncConnectionPool(kwargs=connection_params_db, open=False)
+            
+            sync_pool = redis.ConnectionPool(**connection_params_redis_cache)
+            async_pool = aioredis.ConnectionPool(**connection_params_redis_cache)
+
+            rediscache_sync_client = redis.Redis(connection_pool=sync_pool)
+            rediscache_async_client = aioredis.Redis(connection_pool=async_pool)
+
+            postgres_sync_pool.open()
+            await postgres_async_pool.open()
+
+            with next(get_pg_sync_conn()) as sync_conn:
+                database.init_todo_list(conn_db=sync_conn)
+                print("Database Initizalization Attempted!")
+                logger.info("Database Initialization Attempted!")
+            
+            listener_task = asyncio.create_task(rabbitmq_listener())
+            print("Listener task started!")
+            logger.info("Listener task ready!")
+
+            yield
         
-        sync_pool = redis.ConnectionPool(**connection_params_redis_cache)
-        async_pool = aioredis.ConnectionPool(**connection_params_redis_cache)
+        except Exception as e:
+            print(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}")
+            logger.error(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}", exc_info=True)
+            sys.exit(1) 
 
-        rediscache_sync_client = redis.Redis(connection_pool=sync_pool)
-        rediscache_async_client = aioredis.Redis(connection_pool=async_pool)
+        finally:
+            logger.info("Cleaning up lifespan resources...")
+            listener_task.cancel()
+            try:
+                await listener_task
+            except asyncio.CancelledError:
+                pass
 
-        postgres_sync_pool.open()
-        await postgres_async_pool.open()
-
-        with next(get_pg_sync_conn()) as sync_conn:
-            database.init_todo_list(conn_db=sync_conn)
-            print("Database Initizalization Attempted!")
-            logger.info("Database Initialization Attempted!")
-        
-        # listener_task = asyncio.create_task(rabbitmq_listener())
-        print("Listener task started!")
-        logger.info("Listener task ready!")
-
-        yield
+            if postgres_sync_pool:
+                postgres_sync_pool.close()
+            if postgres_async_pool:
+                await postgres_async_pool.close()
+            if rediscache_sync_client:
+                rediscache_sync_client.close()
+            if rediscache_async_client:
+                await rediscache_async_client.aclose()
     
-    except Exception as e:
-        print(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}")
-        logger.error(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}", exc_info=True)
-        sys.exit(1) 
-
-    finally:
-        logger.info("Cleaning up lifespan resources...")
-        # listener_task.cancel()
-        # try:
-        #     await listener_task
-        # except asyncio.CancelledError:
-        #     pass
-
-        if postgres_sync_pool:
-            postgres_sync_pool.close()
-        if postgres_async_pool:
-            await postgres_async_pool.close()
-        if rediscache_sync_client:
-            rediscache_sync_client.close()
-        if rediscache_async_client:
-            await rediscache_async_client.aclose()
-    
-    # return lifespan
+    logger.info("Returning Lifespan")
+    return lifespan
 
 # Stuff Down Here = Dependency Injection Functions
 # Example for connection (conn: Connection = Depends(get_pg_sync_conn))
