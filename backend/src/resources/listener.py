@@ -36,5 +36,5 @@ class Listener:
 
 # helper function for listeners
 async def publish_to_websockets(data):
-    producer.init_publisher()
-    producer.publish(routing_key=mq_keys.WS_KEY, data=data)
+    await producer.init_publisher()
+    await producer.publish(routing_key=mq_keys.WS_KEY, data=data)

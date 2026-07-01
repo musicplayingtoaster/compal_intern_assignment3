@@ -18,22 +18,22 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/submit")
 async def create_todo(data: Annotated[Todo, Form()]):
-    producer.publish(routing_key=mq_keys.CREATE_KEY, data=data)
+    await producer.publish(routing_key=mq_keys.CREATE_KEY, data=data)
     return "Producer Published: CREATE"
 
 @app.get("/load")
 async def load_todos():
-    producer.publish(routing_key=mq_keys.LOAD_KEY)
+    await producer.publish(routing_key=mq_keys.LOAD_KEY)
     return "Producer Published: LOAD"
 
 @app.delete("/delete")
 async def delete_todo(id: Annotated[int, Body()]):
-    producer.publish(routing_key=mq_keys.DELETE_KEY, data=id)
+    await producer.publish(routing_key=mq_keys.DELETE_KEY, data=id)
     return "Producer Published: DELETE"
 
 @app.put("/update") # Note: "todo" is empty. this is just for transfering data for resolved using the todo model
 async def update_todo(data: Todo):
-    producer.publish(routing_key=mq_keys.UPDATE_KEY, data=data)
+    await producer.publish(routing_key=mq_keys.UPDATE_KEY, data=data)
     # database.update_todo(data.id, data.resolved)
     return "updated"
 
