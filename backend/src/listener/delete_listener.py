@@ -36,7 +36,7 @@ async def delete_listen():
     listener = Listener()
     await listener.listen(key=DELETE_KEY, process_message=process_message)
         
-app = FastAPI(lifespan=database_accessor.create_lifespan(delete_listen)())
+app = FastAPI(lifespan=database_accessor.create_lifespan(rabbitmq_listener=delete_listen))
 # database_accessor = DatabaseAccessor(delete_listen)
 
 # async def init():
