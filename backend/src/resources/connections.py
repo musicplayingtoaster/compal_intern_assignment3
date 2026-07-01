@@ -16,13 +16,13 @@ connection_params_redis_cache = {
     "decode_responses": True,
 }
 
-# connection_params_rabbitmq = {
-#     "host": os.environ.get('RBMQ_HOST'),
-#     "port": int(os.environ.get('RBMQ_PORT')),
-# }
+connection_params_rabbitmq = {
+    "host": os.environ.get('RBMQ_HOST'),
+    "port": int(os.environ.get('RBMQ_PORT')),
+}
 
 # testing purposes
-connection_params_rabbitmq = {
-    "host": "localhost",
-    "port": 5672,
-}
+# connection_params_rabbitmq = {
+#     "host": "localhost",
+#     "port": 5672,
+# }
