@@ -9,6 +9,8 @@ from . import database
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
+import logging
+
 postgres_sync_pool: ConnectionPool = None
 postgres_async_pool: AsyncConnectionPool = None
 rediscache_sync_client: redis.Redis | None = None
@@ -16,9 +18,12 @@ rediscache_async_client: aioredis.Redis | None = None
 
 # def create_lifespan(rabbitmq_listener):
 
+logger = logging.getLogger("uvicorn.error")
+
 @asynccontextmanager
 async def lifespan(app:FastAPI):
-    print("lifespan stuff started!")
+    print("lifespan stuff started!", flush=True)
+    sys.stdout.flush()
 
     try:
         global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
@@ -37,17 +42,21 @@ async def lifespan(app:FastAPI):
         with next(get_pg_sync_conn()) as sync_conn:
             database.init_todo_list(conn_db=sync_conn)
             print("Database Initizalization Attempted!")
+            logger.info("Database Initialization Attempted!")
         
         # listener_task = asyncio.create_task(rabbitmq_listener())
         print("Listener task started!")
+        logger.info("Listener task ready!")
 
         yield
     
     except Exception as e:
-        print(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}", exc_info=True)
+        print(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}")
+        logger.error(f"CRITICAL LIFESPAN ERROR CAUGHT: {str(e)}", exc_info=True)
         sys.exit(1) 
 
     finally:
+        logger.info("Cleaning up lifespan resources...")
         # listener_task.cancel()
         # try:
         #     await listener_task
