@@ -61,6 +61,7 @@ app = FastAPI(lifespan=database_accessor.create_lifespan(rabbitmq_listener=load_
 
 def main():
     # asyncio.run(init())
+    print("Load Starting...")
     uvicorn.run(app)
 
 if __name__ == "__main__":

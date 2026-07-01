@@ -90,8 +90,7 @@ postgres_async_pool: AsyncConnectionPool = None
 rediscache_sync_client: redis.Redis | None = None
 rediscache_async_client: aioredis.Redis | None = None
 
-def create_lifespan(rabbitmq_listener, app:FastAPI = None):
-    print("create lifespan called!")
+def create_lifespan(rabbitmq_listener):
 
     @asynccontextmanager
     async def lifespan(app:FastAPI):
@@ -112,6 +111,7 @@ def create_lifespan(rabbitmq_listener, app:FastAPI = None):
         with next(get_pg_sync_conn()) as sync_conn:
             database.init_todo_list(conn_db=sync_conn)
             print("Database Initizalization Attempted!")
+        
         listener_task = asyncio.create_task(rabbitmq_listener())
         print("Listener task started!")
 
@@ -132,7 +132,6 @@ def create_lifespan(rabbitmq_listener, app:FastAPI = None):
         if rediscache_async_client:
             await rediscache_async_client.aclose()
     
-    print("returning lifespan!")
     return lifespan
 
 # Stuff Down Here = Dependency Injection Functions
