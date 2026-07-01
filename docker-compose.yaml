@@ -140,7 +140,7 @@ services:
       retries: 3
 
 
-  create-listener-server:
+  cl-server:
     build:
       context: .
       dockerfile: ls.Dockerfile
@@ -148,9 +148,6 @@ services:
     env_file:
       - path: ./.env/client-init.env
         required: true
-    environment:
-      - PYTHONBUFFERED=1
-      - PYTHONPATH=/app:/app/src
     command: ["uv", "run", "create_listener"]
     ports:
       - "9000:8000"
@@ -164,7 +161,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  load-listener-server:
+  ll-server:
     build:
       context: .
       dockerfile: ls.Dockerfile
@@ -172,10 +169,7 @@ services:
     env_file:
       - path: ./.env/client-init.env
         required: true
-    environment:
-      - PYTHONBUFFERED=1
-      - PYTHONPATH=/app:/app/src
-    command: [".venv/bin/python", "-m", "src.listener.load_listener"]
+    command: ["uv", "run", "load_listener"]
     ports:
       - "9010:8000"
     networks:
@@ -188,7 +182,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  update-listener-server:
+  ul-server:
     build:
       context: .
       dockerfile: ls.Dockerfile
@@ -196,10 +190,7 @@ services:
     env_file:
       - path: ./.env/client-init.env
         required: true
-    environment:
-      - PYTHONBUFFERED=1
-      - PYTHONPATH=/app:/app/src
-    command: [".venv/bin/python", "-m", "src.listener.update_listener"]
+    command: ["uv", "run", "update_listener"]
     ports:
       - "9020:8000"
     networks:
@@ -212,7 +203,7 @@ services:
       rabbitmq:
         condition: service_healthy
 
-  delete-listener-server:
+  dl-server:
     build:
       context: .
       dockerfile: ls.Dockerfile
@@ -220,10 +211,7 @@ services:
     env_file:
       - path: ./.env/client-init.env
         required: true
-    environment:
-      - PYTHONBUFFERED=1
-      - PYTHONPATH=/app:/app/src
-    command: [".venv/bin/python", "-m", "src.listener.delete_listener"]
+    command: ["uv", "run", "delete-listener"]
     ports:
       - "9030:8000"
     networks:
@@ -244,9 +232,6 @@ services:
     env_file:
       - path: ./.env/client-init.env
         required: true
-    environment:
-      - PYTHONBUFFERED=1
-      - PYTHONPATH=/app:/app/src
     ports:
       - "8765:8765"
     networks:
