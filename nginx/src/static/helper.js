@@ -37,6 +37,8 @@ ws.onmessage = (event) => { // websocket message recieved from client, updates p
             });
             break;
         case 'UPDATE':
+            let data = payload[0]
+            updateTodo(data[0], data[1])
             break;
         case 'DELETE':
             let id = payload[0];
@@ -129,4 +131,11 @@ function deleteSelf(id){
     .then(response => response.json())
     .then(data => console.log(data))
     .catch(error => console.error("Error:", error));
+}
+
+function updateTodo(id, resolved){
+    console.log("updating!", id)
+    let parent_todo = document.getElementById(id.toString)
+    let checkbox = document.querySelector('input[name="resolve"]')
+    if (resolved == 1) {checkbox.checked = true;} else {checkbox.checked = false;}
 }
