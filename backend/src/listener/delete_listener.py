@@ -29,9 +29,9 @@ async def process_message(message: aio_pika.IncomingMessage):
             await publish_to_websockets((payload, DELETE_KEY))
             print("Published to Websockets!")
             
-            await asyncio.sleep(0)
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
+            await message.reject(requeue=True)
 
 async def delete_listen():
     print("Delete_Listener attempting to connect to RabbitMQ")

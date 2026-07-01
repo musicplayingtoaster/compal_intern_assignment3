@@ -31,7 +31,13 @@ class Listener:
             await self.queue.consume(process_message)
             print("Consuming Started!")
 
-            await asyncio.Future()
+            try:
+                while True:
+                    await asyncio.sleep(1)
+            except asyncio.CancelledError:
+                print("Listener stopped.")
+                await self.channel.close()
+                await self.connection.close()
     
 
 # helper function for listeners
