@@ -14,5 +14,5 @@ COPY /backend/src/ ./src/
 
 RUN uv sync --frozen --no-install-project
 
-CMD [".venv/bin/python", "-m", "src.broadcast.broadcast"]
+CMD ["uv", "run", "broadcast"]
 
