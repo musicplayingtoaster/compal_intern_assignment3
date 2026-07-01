@@ -16,6 +16,10 @@ dependencies = [
 
 [project.scripts]
 assignment3 = "assignment3.main:main"
+update_listener = "listener.update_listener:main"
+create_listener = "listener.delete_listener:main"
+load_listener = "listener.load_listener:main"
+delete_listener = "listener.delete_listener:main"
 
 [build-system]
 requires = ["uv_build>=0.11.20,<0.12.0"]
