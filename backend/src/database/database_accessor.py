@@ -4,9 +4,10 @@ from psycopg import Connection, AsyncConnection
 from psycopg_pool import ConnectionPool, AsyncConnectionPool
 import redis, redis.asyncio as aioredis
 from resources.connections import connection_params_db, connection_params_redis_cache
+from . import database
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 
 # class DatabaseAccessor:
 #     def __init__(self, listener):
@@ -103,6 +104,7 @@ def create_lifespan(rabbitmq_listener):
         rediscache_sync_client = redis.Redis(connection_pool=sync_pool)
         rediscache_async_client = aioredis.Redis(connection_pool=async_pool)
 
+        database.init_todo_list(conn_db=Depends(get_pg_sync_conn))
         listener_task = asyncio.create_task(rabbitmq_listener())
 
         postgres_sync_pool.open()

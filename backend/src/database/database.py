@@ -1,7 +1,6 @@
 from resources.todo_model import Todo
 import psycopg
 from psycopg import Connection, AsyncConnection
-import redis
 import redis.asyncio as aioredis
 from redis.exceptions import RedisError
 from dotenv import load_dotenv
@@ -29,19 +28,19 @@ latest_cache_key:str = None
 #     "decode_responses": True,
 # }
 
-# def init_todo_list(conn_db: Connection = Depends(helper.get_pg_sync_conn)) -> None:
-#     try:
-#         #with helper.get_pg_sync_conn() as connection_db:
-#         with conn_db.cursor() as cursor:
-#             cursor.execute('''
-#                 CREATE TABLE IF NOT EXISTS todo_list (
-#                     id SERIAL PRIMARY KEY,
-#                     todo TEXT NOT NULL,
-#                     resolved INTEGER NOT NULL DEFAULT 0
-#                 )
-#             ''')
-#     except psycopg.OperationalError as e:
-#         print("Failed to open database:", e, "(in short, you failed lmao.)")
+def init_todo_list(conn_db: Connection) -> None:
+    try:
+        #with helper.get_pg_sync_conn() as connection_db:
+        with conn_db.cursor() as cursor:
+            cursor.execute('''
+                CREATE TABLE IF NOT EXISTS todo_list (
+                    id SERIAL PRIMARY KEY,
+                    todo TEXT NOT NULL,
+                    resolved INTEGER NOT NULL DEFAULT 0
+                )
+            ''')
+    except psycopg.OperationalError as e:
+        print("Failed to open database:", e, "(in short, you failed lmao.)")
 
 
 async def retrieve_latest_todo(conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
@@ -69,11 +68,12 @@ def get_numeric_sort_key(key):
     match = re.search(r'\d+', key[5:])
     return int(match.group()) if match else 0
 
-def retrieve_all_todos(conn_db: Connection, conn_cache: redis.Redis) -> tuple:
+async def retrieve_all_todos(conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
     try:
         todos = []
         cached_primary_keys = []
-        # with helper.get_rdcache_sync_conn() as connection_cache:
+        
+        # Cache
         unordered_keys = list(conn_cache.scan_iter(match='todo:*'))
         sorted_keys = sorted(unordered_keys, key=get_numeric_sort_key)
 
@@ -93,10 +93,10 @@ def retrieve_all_todos(conn_db: Connection, conn_cache: redis.Redis) -> tuple:
         
         print(f"retrieved from cache: {cached_primary_keys}")
 
-        # with helper.get_pg_sync_conn() as connection_db:
-        with conn_db.cursor() as cursor:
-            cursor.execute("SELECT * FROM todo_list WHERE id != ALL(%s)ORDER BY id", (cached_primary_keys,))
-            all_rows = cursor.fetchall()
+        # DB
+        async with conn_db.cursor() as cursor:
+            await cursor.execute("SELECT * FROM todo_list WHERE id != ALL(%s)ORDER BY id", (cached_primary_keys,))
+            all_rows = await cursor.fetchall()
             todos = all_rows + todos
 
         print(todos)
