@@ -90,49 +90,49 @@ postgres_async_pool: AsyncConnectionPool = None
 rediscache_sync_client: redis.Redis | None = None
 rediscache_async_client: aioredis.Redis | None = None
 
-def create_lifespan(rabbitmq_listener):
+# def create_lifespan(rabbitmq_listener):
 
-    @asynccontextmanager
-    async def lifespan(app:FastAPI):
-        print("lifespan stuff started!")
-        global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
-        postgres_sync_pool = ConnectionPool(kwargs=connection_params_db, open=False)
-        postgres_async_pool = AsyncConnectionPool(kwargs=connection_params_db, open=False)
-        
-        sync_pool = redis.ConnectionPool(**connection_params_redis_cache)
-        async_pool = aioredis.ConnectionPool(**connection_params_redis_cache)
-
-        rediscache_sync_client = redis.Redis(connection_pool=sync_pool)
-        rediscache_async_client = aioredis.Redis(connection_pool=async_pool)
-
-        postgres_sync_pool.open()
-        await postgres_async_pool.open()
-
-        with next(get_pg_sync_conn()) as sync_conn:
-            database.init_todo_list(conn_db=sync_conn)
-            print("Database Initizalization Attempted!")
-        
-        listener_task = asyncio.create_task(rabbitmq_listener())
-        print("Listener task started!")
-
-        yield
-
-        listener_task.cancel()
-        try:
-            await listener_task
-        except asyncio.CancelledError:
-            pass
-
-        if postgres_sync_pool:
-            postgres_sync_pool.close()
-        if postgres_async_pool:
-            await postgres_async_pool.close()
-        if rediscache_sync_client:
-            rediscache_sync_client.close()
-        if rediscache_async_client:
-            await rediscache_async_client.aclose()
+@asynccontextmanager
+async def lifespan(app:FastAPI):
+    print("lifespan stuff started!")
+    global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
+    postgres_sync_pool = ConnectionPool(kwargs=connection_params_db, open=False)
+    postgres_async_pool = AsyncConnectionPool(kwargs=connection_params_db, open=False)
     
-    return lifespan
+    sync_pool = redis.ConnectionPool(**connection_params_redis_cache)
+    async_pool = aioredis.ConnectionPool(**connection_params_redis_cache)
+
+    rediscache_sync_client = redis.Redis(connection_pool=sync_pool)
+    rediscache_async_client = aioredis.Redis(connection_pool=async_pool)
+
+    postgres_sync_pool.open()
+    await postgres_async_pool.open()
+
+    with next(get_pg_sync_conn()) as sync_conn:
+        database.init_todo_list(conn_db=sync_conn)
+        print("Database Initizalization Attempted!")
+    
+    # listener_task = asyncio.create_task(rabbitmq_listener())
+    print("Listener task started!")
+
+    yield
+
+    # listener_task.cancel()
+    # try:
+    #     await listener_task
+    # except asyncio.CancelledError:
+    #     pass
+
+    if postgres_sync_pool:
+        postgres_sync_pool.close()
+    if postgres_async_pool:
+        await postgres_async_pool.close()
+    if rediscache_sync_client:
+        rediscache_sync_client.close()
+    if rediscache_async_client:
+        await rediscache_async_client.aclose()
+    
+    # return lifespan
 
 # Stuff Down Here = Dependency Injection Functions
 # Example for connection (conn: Connection = Depends(get_pg_sync_conn))

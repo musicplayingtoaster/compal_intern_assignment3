@@ -35,29 +35,8 @@ async def load_listen():
     listener = Listener()
     await listener.listen(key=LOAD_KEY, process_message=process_message)
         
-app = FastAPI(lifespan=database_accessor.create_lifespan(load_listen))
-
-# database_accessor = DatabaseAccessor(load_listen)
-
-# async def init():
-#     shutdown_trigger = asyncio.Event()
-
-#     loop = asyncio.get_event_loop()
-
-#     def helper_stop_signal():
-#         print("Received shutdown signal from Docker...")
-#         shutdown_trigger.set()
-
-#     for sig in (signal.SIGTERM, signal.SIGINT):
-#         loop.add_signal_handler(sig, helper_stop_signal)
-
-#     async with database_accessor:
-#         try:
-#             await shutdown_trigger.wait()
-#         except asyncio.CancelledError:
-#             print("Shutdown triggered via cancellation.")
-#         finally:
-#             print("System shutdown complete.")
+# app = FastAPI(lifespan=database_accessor.create_lifespan(load_listen))
+app = FastAPI(lifespan=database_accessor.lifespan)
 
 def main():
     # asyncio.run(init())

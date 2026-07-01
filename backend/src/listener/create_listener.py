@@ -37,7 +37,8 @@ async def create_listen():
     listener = Listener()
     await listener.listen(key=CREATE_KEY, process_message=process_message)
         
-app = FastAPI(lifespan=database_accessor.create_lifespan(create_listen))
+# app = FastAPI(lifespan=database_accessor.create_lifespan(create_listen))
+app = FastAPI(lifespan=database_accessor.lifespan)
 
 def main():
     # asyncio.run(init())

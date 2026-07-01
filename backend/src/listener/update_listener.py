@@ -37,8 +37,8 @@ async def update_listen():
     listener = Listener()
     await listener.listen(key=UPDATE_KEY, process_message=process_message)
 
-
-app = FastAPI(lifespan=database_accessor.create_lifespan(update_listen))
+# app = FastAPI(lifespan=database_accessor.create_lifespan(update_listen))
+app = FastAPI(lifespan=database_accessor.lifespan)
 
 def main():
     # asyncio.run(init())
