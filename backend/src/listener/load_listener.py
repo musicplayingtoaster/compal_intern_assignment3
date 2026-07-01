@@ -35,7 +35,7 @@ async def load_listen():
     listener = Listener()
     await listener.listen(key=LOAD_KEY, process_message=process_message)
         
-app = FastAPI(lifespan=database_accessor.create_lifespan(rabbitmq_listener=load_listen))
+app = FastAPI(lifespan=database_accessor.create_lifespan(load_listen))
 
 # database_accessor = DatabaseAccessor(load_listen)
 

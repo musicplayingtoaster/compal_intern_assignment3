@@ -37,7 +37,7 @@ async def create_listen():
     listener = Listener()
     await listener.listen(key=CREATE_KEY, process_message=process_message)
         
-app = FastAPI(lifespan=database_accessor.create_lifespan(rabbitmq_listener=create_listen))
+app = FastAPI(lifespan=database_accessor.create_lifespan(create_listen))
 
 def main():
     # asyncio.run(init())
