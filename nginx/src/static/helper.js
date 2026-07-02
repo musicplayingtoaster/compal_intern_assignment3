@@ -23,7 +23,7 @@ ws.onclose = (event) => {
 ws.onmessage = (event) => { // websocket message recieved from client, updates page
     console.log(event)
 
-    let payload = JSON.parse(JSON.parse(event.data))
+    let payload = JSON.parse(event.data)
     console.log(payload)
     switch(payload[1]){
         case 'CREATE':
