@@ -16,18 +16,18 @@ class Listener:
             print("Attempting to Connect to RabbitMQ")
             self.connection = await aio_pika.connect_robust(**self.conn_params)
             print("Connected!")
-            
-            print("Getting Channel...")
-            self.channel = await self.connection.channel()
-            await self.channel.set_qos(prefetch_count=10) # limits number of unack messages to 1
-            print("Channel Created!")
-
-            print("Declaring Exchange...")
-            self.exchange = await self.channel.declare_exchange(mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
-            print("Exchange Declared!")
 
     async def listen(self, key, process_message):
         await self.connect()
+
+        print("Getting Channel...")
+        self.channel = await self.connection.channel()
+        await self.channel.set_qos(prefetch_count=10) # limits number of unack messages to 1
+        print("Channel Created!")
+
+        print("Declaring Exchange...")
+        self.exchange = await self.channel.declare_exchange(mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
+        print("Exchange Declared!")
 
         print("Declaring Queue...")
         self.queue = await self.channel.declare_queue(key, durable=True)

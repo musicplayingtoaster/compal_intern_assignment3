@@ -4,7 +4,7 @@ from resources.listener import Listener, publish_to_websockets
 from database import database_accessor 
 from database import database
 from fastapi import FastAPI
-from contextlib import asynccontextmanager
+from contextlib import contextmanager
 
 # routing keys
 LOAD_KEY = mq_keys.LOAD_KEY
@@ -14,14 +14,14 @@ EXCHANGE = mq_keys.EXCHANGE
 
 logger = logging.getLogger("uvicorn.error")
 
-async_db_context = asynccontextmanager(database_accessor.get_pg_async_conn)
+sync_db_context = contextmanager(database_accessor.get_pg_sync_conn)
 
 async def process_message(message: aio_pika.IncomingMessage):
     print("Load Listener Heard Message!")
     async with message.process():
         try:
-            async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn as conn_cache:
-                retrieved_todos = await database.retrieve_all_todos(conn_db=conn_db, conn_cache=conn_cache)
+            with sync_db_context() as conn_db, database_accessor.get_rdcache_sync_conn as conn_cache:
+                retrieved_todos = database.retrieve_all_todos(conn_db=conn_db, conn_cache=conn_cache)
                 print("Retrieved todos from Database!")
             
             

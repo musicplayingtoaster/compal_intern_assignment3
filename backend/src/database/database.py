@@ -2,6 +2,7 @@ from resources.todo_model import Todo
 import psycopg
 from psycopg import Connection, AsyncConnection
 import redis.asyncio as aioredis
+import redis
 from redis.exceptions import RedisError
 from dotenv import load_dotenv
 import re
@@ -70,7 +71,7 @@ def get_numeric_sort_key(key):
     match = re.search(r'\d+', key[5:])
     return int(match.group()) if match else 0
 
-async def retrieve_all_todos(conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
+def retrieve_all_todos(conn_db: Connection, conn_cache: redis.Redis) -> tuple:
     try:
         todos = []
         cached_primary_keys = []
@@ -96,9 +97,9 @@ async def retrieve_all_todos(conn_db: AsyncConnection, conn_cache: aioredis.Redi
         print(f"retrieved from cache: {cached_primary_keys}")
 
         # DB
-        async with conn_db.cursor() as cursor:
-            await cursor.execute("SELECT * FROM todo_list WHERE id != ALL(%s)ORDER BY id", (cached_primary_keys,))
-            all_rows = await cursor.fetchall()
+        with conn_db.cursor() as cursor:
+            cursor.execute("SELECT * FROM todo_list WHERE id != ALL(%s)ORDER BY id", (cached_primary_keys,))
+            all_rows = cursor.fetchall()
             todos = all_rows + todos
 
         print(todos)
