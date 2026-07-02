@@ -19,33 +19,29 @@ app = FastAPI(lifespan=lifespan)
 class ConnectionManager:
     def __init__(self):
         self.active_connections: set[WebSocket] = set()
-        self._lock = asyncio.Lock()
     
     # connection needs to be async as it requires waiting to ensure the websocket connection from client is successful
     async def connect(self, websocket:WebSocket):
         await websocket.accept()
-        async with self._lock:
-            self.active_connections.add(websocket)
-            print("connected:", websocket)
+        self.active_connections.add(websocket)
+        print("connected:", websocket)
         
     
     async def disconnect(self, websocket:WebSocket):
-        async with self._lock:
-            self.active_connections.discard(websocket)
-            print("disconnected:", websocket)
+        self.active_connections.discard(websocket)
+        print("disconnected:", websocket)
     
     async def broadcast(self, data):
-        async with self._lock:
-            if not self.active_connections:
-                return
+        if not self.active_connections:
+            return
 
-            tasks = [connection.send_json(data) for connection in self.active_connections]
-            results = await asyncio.gather(*tasks, return_exceptions=True)
-            
-            for connection, result in zip(list(self.active_connections), results):
-                if isinstance(result, Exception):
-                    print(f"Broadcast failed for {connection.client}: {result}")
-                    self.active_connections.discard(connection)
+        tasks = [connection.send_json(data) for connection in self.active_connections]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        
+        for connection, result in zip(list(self.active_connections), results):
+            if isinstance(result, Exception):
+                print(f"Broadcast failed for {connection.client}: {result}")
+                self.active_connections.discard(connection)
 
 manager = ConnectionManager()
 
