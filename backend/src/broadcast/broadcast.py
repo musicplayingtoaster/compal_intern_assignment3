@@ -1,6 +1,6 @@
 # rabbitmq listener sends stuff here
 # dedicated websocket server to push to all clients
-import json, aio_pika, uvicorn
+import asyncio, json, aio_pika, uvicorn
 from resources import mq_keys
 from resources.listener import listener_manager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -11,7 +11,7 @@ WS_KEY = mq_keys.WS_KEY
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await broadcaster()
+    asyncio.create_task(broadcaster())
     yield
 
 app = FastAPI(lifespan=lifespan)
