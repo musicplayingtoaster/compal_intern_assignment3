@@ -37,8 +37,14 @@ class ConnectionManager:
         print("key value:", data[1])
         if data[1] == mq_keys.LOAD_KEY:
             self.connection_ready.clear()
-        
-        await self.connection_ready.wait()
+            await self.connection_ready.wait()
+            try:
+                print("attempting to send data:", data, "Only to ", connection)
+                await connection.send_json(data)
+            except Exception:
+                pass
+            
+
 
         for connection in self.active_connections:
             try:
