@@ -20,6 +20,10 @@ ws.onclose = (event) => {
     }
 }
 
+window.onbeforeunload = function() {
+    ws.close(1000, "Page reloading");
+};
+
 ws.onmessage = (event) => { // websocket message recieved from client, updates page
     console.log(event)
 
