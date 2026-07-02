@@ -39,6 +39,7 @@ class Listener:
         async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 print("Message Recieved!")
+                print(message)
                 asyncio.create_task(process_message(message))
                 print("Task created! Starting to Process...")
         
