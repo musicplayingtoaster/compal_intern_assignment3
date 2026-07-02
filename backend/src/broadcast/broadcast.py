@@ -42,9 +42,9 @@ manager = ConnectionManager()
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         try:
-            payload = message.body.decode()
+            payload = json.loads(message.body.decode())
             
-            payload[0] = json.loads(json.loads(payload[0]))
+            print(payload)
 
             # Javascript will recieve a tuple of (data, action)
             # Take the action in Javascript to determine what to do with said data
@@ -59,8 +59,9 @@ async def broadcaster():
 
 @app.websocket("/ws")
 async def handle_websockets(websocket:WebSocket):
+    await manager.connect(websocket)
     try:
-        await manager.connect(websocket)
+        pass
     except WebSocketDisconnect:
         manager.disconnect(websocket)
 
