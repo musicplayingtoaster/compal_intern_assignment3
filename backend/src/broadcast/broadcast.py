@@ -34,9 +34,6 @@ class ConnectionManager:
         print("disconnected:", websocket)
 
     async def broadcast(self, data):
-        if not self.active_connections:
-            return
-        
         print("key value:", data[1])
         if data[1] == mq_keys.LOAD_KEY:
             self.connection_ready.clear()
