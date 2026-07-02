@@ -17,7 +17,7 @@ async def process_message(message: aio_pika.IncomingMessage):
     print("Delete Listener Heard Message!")
     async with message.process():
         try:
-            payload = json.loads(message.body.decode()) # Primary Key
+            payload = json.loads(json.loads(message.body.decode())) # Primary Key
 
             async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn() as conn_cache:
                 await database.remove_todo(primary_key=payload, conn_db=conn_db, conn_cache=conn_cache)

@@ -47,7 +47,7 @@ async def process_message(message: aio_pika.IncomingMessage):
 async def broadcaster():
     print("Broadcaster attempting to connect to RabbitMQ")
     listener = listener_manager
-    await listener.listen(key=WS_KEY, process_message=process_message)
+    await listener.listen(key=WS_KEY, process_message=process_message, arguments={"x-message-ttl": 60000 })
 
 @app.websocket("/ws")
 async def handle_websockets(websocket:WebSocket):

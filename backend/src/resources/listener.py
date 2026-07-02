@@ -25,11 +25,13 @@ class Listener:
             self.exchange = await self.channel.declare_exchange(name=mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
             print("Exchange Declared!")
 
-    async def listen(self, key, process_message):
+    async def listen(self, key, process_message, arguments = None):
         await self.connect()
 
         print("Declaring Queue...")
-        queue = await self.channel.declare_queue(key, durable=True)
+        queue = await self.channel.declare_queue(key, 
+                                                 durable=True, 
+                                                 arguments=arguments)
         print("Queue Declared!")
 
         print("Binding Queue...")

@@ -18,7 +18,7 @@ async def process_message(message: aio_pika.IncomingMessage):
     print("Update Listener Heard Message!")
     async with message.process():
         try:
-            payload = json.loads(message.body.decode())
+            payload = json.loads(json.loads(message.body.decode()))
             
             async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn() as conn_cache:
                 await database.update_todo(primary_key=payload[0], resolved=payload[1], conn_db=conn_db, conn_cache=conn_cache)
