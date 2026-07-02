@@ -19,7 +19,7 @@ async def process_message(message: aio_pika.IncomingMessage):
     logger.info("Create_Listener Heard Message!")
     async with message.process():
         try:
-            payload = json.loads(json.loads(message.body.decode()))
+            payload = json.loads(message.body.decode())
 
             async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn() as conn_cache:
                 await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
