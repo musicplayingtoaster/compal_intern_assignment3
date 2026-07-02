@@ -21,7 +21,8 @@ async def process_message(message: aio_pika.IncomingMessage):
         try:
             payload = json.loads(message.body.decode())
 
-            async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn() as conn_cache:
+            conn_cache = await database_accessor.get_rdcache_async_conn()
+            async with async_db_context() as conn_db, conn_cache:
                 await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
                 print("Added to Database!")
             
