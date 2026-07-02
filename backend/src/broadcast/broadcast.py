@@ -12,6 +12,7 @@ WS_KEY = mq_keys.WS_KEY
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await broadcaster()
+    yield
 
 app = FastAPI(lifespan=lifespan)
 
