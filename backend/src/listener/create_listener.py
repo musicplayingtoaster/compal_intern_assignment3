@@ -23,10 +23,13 @@ async def process_message(message: aio_pika.IncomingMessage):
 
             conn_cache = await database_accessor.get_rdcache_async_conn()
             async with async_db_context() as conn_db, conn_cache:
-                await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
+                todo = await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
                 print("Added to Database!")
             
-            await publish_to_websockets((payload, CREATE_KEY))
+            todo_dict = dict(zip(Todo.model_fields.keys()), todo)
+            packaged_todo = Todo(**todo_dict)
+
+            await publish_to_websockets((packaged_todo, CREATE_KEY))
             print("Published to Websockets!")
         except Exception as e:
             print(f"Failed to process message. Error: {e}")

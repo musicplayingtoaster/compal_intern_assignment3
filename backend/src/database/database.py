@@ -107,7 +107,7 @@ def retrieve_all_todos(conn_db: Connection, conn_cache: redis.Redis) -> tuple:
     except psycopg.OperationalError as e:
         print("Failed to open database and/or cache:", e, "(in short, you failed lmao.)")
 
-async def add_todo(todo:Todo, conn_db: AsyncConnection, conn_cache: aioredis.Redis):
+async def add_todo(todo:Todo, conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
     try:
         global latest_cache_key
         async with conn_db.cursor() as cursor:
@@ -118,6 +118,7 @@ async def add_todo(todo:Todo, conn_db: AsyncConnection, conn_cache: aioredis.Red
         latest_cache_key = f"todo:{latest_todo[0]}"
         todo.id = latest_todo[0]
         await conn_cache.setex(latest_cache_key, CACHETTL, todo.model_dump_json()) 
+        return latest_todo
     except psycopg.OperationalError as e:
         print("Failed to open database and/or cache:", e, "(in short, you failed lmao.)")
 
