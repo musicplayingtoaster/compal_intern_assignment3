@@ -30,7 +30,7 @@ async def process_message(message: aio_pika.IncomingMessage):
             # returns the primary key and resolved used to allow js to update
             await publish_to_websockets((payload, UPDATE_KEY)) 
             print("Published to Websockets!")
-            
+            await message.ack()
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
             await message.reject(requeue=True)

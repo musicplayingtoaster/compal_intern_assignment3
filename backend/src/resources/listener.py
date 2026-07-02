@@ -33,16 +33,19 @@ class Listener:
         self.queue = await self.channel.declare_queue(key, durable=True)
         print("Queue Declared! Starting to Consume Messages...")
 
-        await self.queue.consume(process_message)
-        print("Consuming Started!")
+        async with self.queue.iterator() as queue_iter:
+            async for message in queue_iter:
+                asyncio.create_task(process_message(message))
+        # await self.queue.consume(process_message)
+        # print("Consuming Started!")
 
-        try:
-            while True:
-                await asyncio.sleep(1)
-        except asyncio.CancelledError:
-            print("Listener stopped.")
-            await self.channel.close()
-            await self.connection.close()
+        # try:
+        #     while True:
+        #         await asyncio.sleep(1)
+        # except asyncio.CancelledError:
+        #     print("Listener stopped.")
+        #     await self.channel.close()
+        #     await self.connection.close()
     
 
 # helper function for listeners
