@@ -22,7 +22,7 @@ class Listener:
         
         print("Getting Channel...")
         self.channel = await self.connection.channel()
-        await self.channel.set_qos(prefetch_count=1) # limits number of unack messages to 1
+        await self.channel.set_qos(prefetch_count=100) # limits number of unack messages to 1
         print("Channel Created!")
 
         print("Declaring Exchange...")
