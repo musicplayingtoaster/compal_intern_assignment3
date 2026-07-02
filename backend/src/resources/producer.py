@@ -25,9 +25,10 @@ async def init_publisher():
 async def publish(routing_key, data = None):
     print("Publishing Message!")
     confirmation = await _pub_exchange.publish(message=aio_pika.Message(body=json.dumps(data).encode()), 
-                                routing_key=routing_key)
+                                               routing_key=routing_key)
     if confirmation:
         print("Message Published!")
+        print(confirmation)
     else:
         print("Message Unconfirmed! Just get good man")
 
