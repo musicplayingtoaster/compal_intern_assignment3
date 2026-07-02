@@ -18,25 +18,34 @@ app = FastAPI(lifespan=lifespan)
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: list[WebSocket] = []
+        self.active_connections: set[WebSocket] = set()
+        self._lock = asyncio.Lock()
     
     # connection needs to be async as it requires waiting to ensure the websocket connection from client is successful
     async def connect(self, websocket:WebSocket):
         await websocket.accept()
-        print("connected:", websocket)
-        self.active_connections.append(websocket)
+        async with self._lock:
+            self.active_connections.add(websocket)
+            print("connected:", websocket)
+        
     
-    def disconnect(self, websocket:WebSocket):
-        self.active_connections.remove(websocket)
+    async def disconnect(self, websocket:WebSocket):
+        async with self._lock:
+            self.active_connections.discard(websocket)
+            print("disconnected:", websocket)
     
     async def broadcast(self, data):
-        for connection in self.active_connections:
-            try:
-                print("attempting to send data:", data, "to ", connection)
-                await connection.send_json(data)
-            except Exception as e:
-                print("well uh an exception happened:", e)
-                pass
+        async with self.lock:
+            if not self.active_connections:
+                return
+
+            tasks = [connection.send_json(data) for connection in self.active_connections]
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            
+            for connection, result in zip(list(self.active_connections), results):
+                if isinstance(result, Exception):
+                    print(f"Broadcast failed for {connection.client}: {result}")
+                    self.active_connections.discard(connection)
 
 manager = ConnectionManager()
 
@@ -66,10 +75,10 @@ async def handle_websockets(websocket:WebSocket):
             await websocket.receive_text()
     except WebSocketDisconnect:
         print("Disconnected Normally")
-        manager.disconnect(websocket)
+        await manager.disconnect(websocket)
     except Exception as e:
         print("bruuuuuuuuuuuuh exception:", e)
-        manager.disconnect(websocket)
+        await manager.disconnect(websocket)
 
 def main():
     # asyncio.run(init())
