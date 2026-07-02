@@ -37,7 +37,8 @@ class ConnectionManager:
         if not self.active_connections:
             return
         
-        if json.loads(data)[1] == mq_keys.LOAD_KEY:
+        print("key value:", data[1])
+        if data[1] == mq_keys.LOAD_KEY:
             self.connection_ready.clear()
         
         await self.connection_ready.wait()
@@ -60,7 +61,9 @@ async def process_message(message: aio_pika.IncomingMessage):
 
             # Javascript will recieve a tuple of (data, action)
             # Take the action in Javascript to determine what to do with said data
+            print("manager broadcasting...")
             await manager.broadcast(payload)
+            print("manager broadcasted!")
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
 
