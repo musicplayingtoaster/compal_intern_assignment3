@@ -18,13 +18,15 @@ app = FastAPI(lifespan=lifespan)
 
 class ConnectionManager:
     def __init__(self):
-        self.active_connections: set[WebSocket] = set()
+        self.active_connections: list[WebSocket] = []
         self.connection_ready = asyncio.Event()
+        self.latest_websocket = None
     
     # connection needs to be async as it requires waiting to ensure the websocket connection from client is successful
     async def connect(self, websocket:WebSocket):
         await websocket.accept()
-        self.active_connections.add(websocket)
+        self.latest_websocket = websocket
+        self.active_connections.append(websocket)
         print("connected:", websocket)
 
         self.connection_ready.set()
@@ -39,8 +41,8 @@ class ConnectionManager:
             self.connection_ready.clear()
             await self.connection_ready.wait()
             try:
-                print("attempting to send data:", data, "Only to ", connection)
-                await connection.send_json(data)
+                print("attempting to send data:", data, "Only to ", self.latest_websocket)
+                await self.latest_websocket.send_json(data)
             except Exception:
                 pass
             
