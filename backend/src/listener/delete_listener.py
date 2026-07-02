@@ -22,7 +22,9 @@ async def process_message(message: aio_pika.IncomingMessage):
 
             # stuck here vvv (never enters)
             try:
+                print("postgres connection...")
                 async with async_db_context() as conn_db:
+                    print("postgres connected! cache connection...")
                     conn_cache = await database_accessor.get_rdcache_async_conn()
                     async with conn_cache:
                         print("Removing from Database...")
