@@ -47,8 +47,6 @@ class ConnectionManager:
             except Exception:
                 pass
             
-
-
         for connection in self.active_connections:
             try:
                 print("attempting to send data:", data, "to ", connection)

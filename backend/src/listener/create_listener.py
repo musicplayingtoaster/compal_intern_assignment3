@@ -1,4 +1,4 @@
-import asyncio, json, aio_pika, uvicorn, logging
+import json, aio_pika, uvicorn, logging
 from resources import mq_keys
 from resources.todo_model import Todo
 from resources.listener import listener_manager, publish_to_websockets
