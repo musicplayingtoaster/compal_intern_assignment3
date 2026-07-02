@@ -26,22 +26,22 @@ ws.onmessage = (event) => { // websocket message recieved from client, updates p
     let payload = JSON.parse(event.data)
     console.log(payload)
     switch(payload[1]){
-        case 'CREATE':
+        case 'create':
             let todo = payload[0];
             createTodo(todo[0], todo[1]);
             break;
-        case 'LOAD':
+        case 'load':
             let data = payload[0];
             console.log(data);
             data.forEach(element => {
                 createTodo(element[0], element[1], element[2]);
             });
             break;
-        case 'UPDATE':
+        case 'update':
             let update = payload[0]
             updateTodo(update[0], update[1])
             break;
-        case 'DELETE':
+        case 'delete':
             let id = payload[0];
             document.getElementById(id.toString()).remove();
             break;
