@@ -140,7 +140,7 @@ function deleteSelf(id){
 
 function updateTodo(id, resolved){
     console.log("updating!", id)
-    let parent_todo = document.getElementById(id.toString)
+    let parent_todo = document.getElementById(id.toString())
     let checkbox = document.querySelector('input[name="resolve"]')
     if (resolved == 1) {checkbox.checked = true;} else {checkbox.checked = false;}
 }
