@@ -18,7 +18,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.post("/submit")
 async def create_todo(data: Annotated[Todo, Form()]):
-    await producer.publish(routing_key=mq_keys.CREATE_KEY, data=data.model_dump)
+    await producer.publish(routing_key=mq_keys.CREATE_KEY, data=data.model_dump())
     return "Producer Published: CREATE"
 
 @app.get("/load")
