@@ -43,6 +43,7 @@ class ConnectionManager:
             try:
                 print("attempting to send data:", data, "Only to ", self.latest_websocket)
                 await self.latest_websocket.send_json(data)
+                return
             except Exception:
                 pass
             
