@@ -33,7 +33,7 @@ async def delete_todo(id: Annotated[int, Body()]):
 
 @app.put("/update") # Note: "todo" is empty. this is just for transfering data for resolved using the todo model
 async def update_todo(data: Todo):
-    await producer.publish(routing_key=mq_keys.UPDATE_KEY, data=data)
+    await producer.publish(routing_key=mq_keys.UPDATE_KEY, data=data.model_dump())
     # database.update_todo(data.id, data.resolved)
     return "updated"
 

@@ -43,7 +43,7 @@ ws.onmessage = (event) => { // websocket message recieved from client, updates p
             break;
         case 'update':
             let update = payload[0]
-            updateTodo(update[0], update[1])
+            updateTodo(update['id'], update['resolved'])
             break;
         case 'delete':
             let id = payload[0];
