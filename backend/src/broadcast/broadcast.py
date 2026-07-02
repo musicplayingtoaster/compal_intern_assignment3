@@ -1,8 +1,8 @@
 # rabbitmq listener sends stuff here
 # dedicated websocket server to push to all clients
-import asyncio, aio_pika, uvicorn
+import aio_pika, uvicorn
 from resources import mq_keys
-from resources.listener import Listener
+from resources.listener import listener_manager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 
 # routing keys
@@ -70,14 +70,12 @@ async def process_message(message: aio_pika.IncomingMessage):
             # Javascript will recieve a tuple of (data, action)
             # Take the action in Javascript to determine what to do with said data
             await manager.broadcast(payload)
-
-            await asyncio.sleep(0)
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
 
 async def broadcaster():
     print("Broadcaster attempting to connect to RabbitMQ")
-    listener = Listener()
+    listener = listener_manager
     await listener.listen(key=WS_KEY, process_message=process_message)
 
 @app.websocket("/ws")
