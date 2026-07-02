@@ -31,8 +31,8 @@ ws.onmessage = (event) => { // websocket message recieved from client, updates p
     console.log(payload)
     switch(payload[1]){
         case 'create':
-            let todo = payload[0];
-            createTodo(todo[0], todo[1]);
+            let todo_item = payload[0];
+            createTodo(todo['id'], todo['todo']);
             break;
         case 'load':
             let data = payload[0];
