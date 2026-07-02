@@ -22,7 +22,7 @@ class Listener:
             print("Channel Created!")
 
             print("Declaring Exchange...")
-            self.exchange = await self.channel.declare_exchange(mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
+            self.exchange = await self.channel.declare_exchange(name=mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
             print("Exchange Declared!")
 
     async def listen(self, key, process_message):

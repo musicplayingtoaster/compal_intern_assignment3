@@ -19,6 +19,7 @@ async_db_context = asynccontextmanager(database_accessor.get_pg_async_conn)
 
 async def process_message(message: aio_pika.IncomingMessage):
     print("Create Listener Heard Message!")
+    logger.info("Create_Listener Heard Message!")
     async with message.process():
         try:
             payload = message.body.decode()
