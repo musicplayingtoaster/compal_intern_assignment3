@@ -9,7 +9,6 @@ class Listener:
         self.connection = None
         self.channel = None
         self.exchange = None
-        self.queue = None
     
     async def connect(self):
         if not self.connection:
@@ -17,27 +16,27 @@ class Listener:
             self.connection = await aio_pika.connect_robust(**self.conn_params)
             print("Connected!")
 
+            print("Getting Channel...")
+            self.channel = await self.connection.channel()
+            await self.channel.set_qos(prefetch_count=10) # limits number of unack messages to 1
+            print("Channel Created!")
+
+            print("Declaring Exchange...")
+            self.exchange = await self.channel.declare_exchange(mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
+            print("Exchange Declared!")
+
     async def listen(self, key, process_message):
         await self.connect()
 
-        print("Getting Channel...")
-        self.channel = await self.connection.channel()
-        await self.channel.set_qos(prefetch_count=10) # limits number of unack messages to 1
-        print("Channel Created!")
-
-        print("Declaring Exchange...")
-        self.exchange = await self.channel.declare_exchange(mq_keys.EXCHANGE, type=aio_pika.ExchangeType.DIRECT)
-        print("Exchange Declared!")
-
         print("Declaring Queue...")
-        self.queue = await self.channel.declare_queue(key, durable=True)
+        queue = await self.channel.declare_queue(key, durable=True)
         print("Queue Declared!")
 
         print("Binding Queue...")
-        await self.queue.bind(self.exchange, routing_key=key)
+        await queue.bind(self.exchange, routing_key=key)
         print("Queue bound to Exchange and Key! Starting to Consume...")
 
-        async with self.queue.iterator() as queue_iter:
+        async with queue.iterator() as queue_iter:
             async for message in queue_iter:
                 print("Message Recieved!")
                 asyncio.create_task(process_message(message))
@@ -54,6 +53,7 @@ class Listener:
         #     await self.channel.close()
         #     await self.connection.close()
     
+listener_manager = Listener()
 
 # helper function for listeners
 async def publish_to_websockets(data):

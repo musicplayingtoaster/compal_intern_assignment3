@@ -1,6 +1,6 @@
 import asyncio, aio_pika, uvicorn, logging
 from resources import mq_keys
-from resources.listener import Listener, publish_to_websockets
+from resources.listener import listener_manager, publish_to_websockets
 from database import database_accessor 
 from database import database
 from fastapi import FastAPI
@@ -34,7 +34,7 @@ async def process_message(message: aio_pika.IncomingMessage):
 async def load_listen():
     print("Load_Listener attempting to connect to RabbitMQ")
     logger.info("Load_Listener attempting to connect to RabbitMQ")
-    listener = Listener()
+    listener = listener_manager
     await listener.listen(key=LOAD_KEY, process_message=process_message)
         
 # app = FastAPI(lifespan=database_accessor.create_lifespan(load_listen))
