@@ -26,7 +26,7 @@ async def process_message(message: aio_pika.IncomingMessage):
                 todo = await database.add_todo(todo=Todo.model_validate(payload), conn_db=conn_db, conn_cache=conn_cache)
                 print("Added to Database!")
             
-            todo_dict = dict(zip(Todo.model_fields.keys()), todo)
+            todo_dict = dict(zip(Todo.model_fields.keys(), todo))
             packaged_todo = Todo(**todo_dict)
 
             await publish_to_websockets((packaged_todo, CREATE_KEY))
