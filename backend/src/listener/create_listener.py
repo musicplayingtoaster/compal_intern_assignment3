@@ -29,7 +29,7 @@ async def process_message(message: aio_pika.IncomingMessage):
             todo_dict = dict(zip(Todo.model_fields.keys(), todo))
             packaged_todo = Todo(**todo_dict)
 
-            await publish_to_websockets((packaged_todo, CREATE_KEY))
+            await publish_to_websockets((packaged_todo.model_dump_json, CREATE_KEY))
             print("Published to Websockets!")
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
