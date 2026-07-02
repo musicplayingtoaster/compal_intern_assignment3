@@ -35,7 +35,7 @@ class ConnectionManager:
             print("disconnected:", websocket)
     
     async def broadcast(self, data):
-        async with self.lock:
+        async with self._lock:
             if not self.active_connections:
                 return
 
