@@ -42,13 +42,12 @@ class ConnectionManager:
         
         await self.connection_ready.wait()
 
-        tasks = [connection.send_text(data) for connection in self.active_connections]
-        results = await asyncio.gather(*tasks, return_exceptions=True)
-        
-        for connection, result in zip(list(self.active_connections), results):
-            if isinstance(result, Exception):
-                print(f"Broadcast failed for {connection.client}: {result}")
-                self.active_connections.discard(connection)
+        for connection in self.active_connections:
+            try:
+                print("attempting to send data:", data, "to ", connection)
+                await connection.send_json(data)
+            except Exception:
+                pass
 
 manager = ConnectionManager()
 
