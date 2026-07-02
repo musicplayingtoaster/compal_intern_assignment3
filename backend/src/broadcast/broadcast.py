@@ -34,7 +34,8 @@ class ConnectionManager:
             try:
                 print("attempting to send data:", data, "to ", connection)
                 await connection.send_json(data)
-            except Exception:
+            except Exception as e:
+                print("well uh an exception happened:", e)
                 pass
 
 manager = ConnectionManager()
@@ -61,8 +62,13 @@ async def broadcaster():
 async def handle_websockets(websocket:WebSocket):
     await manager.connect(websocket)
     try:
-        pass
+        while True:
+            await websocket.receive_text()
     except WebSocketDisconnect:
+        print("Disconnected Normally")
+        manager.disconnect(websocket)
+    except Exception as e:
+        print("bruuuuuuuuuuuuh exception:", e)
         manager.disconnect(websocket)
 
 def main():
