@@ -9,9 +9,6 @@ from contextlib import asynccontextmanager
 # routing keys
 DELETE_KEY = mq_keys.DELETE_KEY
 
-# exchange name
-EXCHANGE = mq_keys.EXCHANGE
-
 logger = logging.getLogger("uvicorn.error")
 
 async_db_context = asynccontextmanager(database_accessor.get_pg_async_conn)

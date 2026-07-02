@@ -9,9 +9,6 @@ from contextlib import asynccontextmanager
 # routing keys
 UPDATE_KEY = mq_keys.UPDATE_KEY
 
-# exchange name
-EXCHANGE = mq_keys.EXCHANGE
-
 logger = logging.getLogger("uvicorn.error")
 
 

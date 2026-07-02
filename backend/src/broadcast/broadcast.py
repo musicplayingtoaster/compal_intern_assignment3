@@ -10,35 +10,6 @@ WS_KEY = mq_keys.WS_KEY
 
 app = FastAPI()
 
-# class WebSocketBroadcastServer:
-#     def __init__(self, host="localhost", port=8765):
-#         self.host = host
-#         self.port = port
-#         # Track active client connections
-#         self.connections = set()
-
-#     async def register(self, websocket):
-#         self.connections.add(websocket)
-#         print(f"Client connected. Total clients: {len(self.connections)}")
-#         try:
-#             await websocket.wait_closed()
-#         finally:
-#             self.connections.remove(websocket)
-#             print(f"Client disconnected. Total clients: {len(self.connections)}")
-
-#     async def broadcast(self, message):
-#         if self.connections:
-#             # Create send tasks for all active clients
-#             tasks = [client.send(message) for client in self.connections]
-#             await asyncio.gather(*tasks, return_exceptions=True)
-
-#     async def start(self):
-#         async with websockets.serve(self.register, self.host, self.port):
-#             print(f"Broadcast server running on ws://{self.host}:{self.port}")
-#             await asyncio.Future()  
-
-# _websocket_manager:WebSocketBroadcastServer = None
-
 class ConnectionManager:
     def __init__(self):
         self.active_connections: list[WebSocket] = []

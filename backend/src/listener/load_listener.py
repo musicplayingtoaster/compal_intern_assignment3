@@ -9,9 +9,6 @@ from contextlib import contextmanager
 # routing keys
 LOAD_KEY = mq_keys.LOAD_KEY
 
-# exchange name
-EXCHANGE = mq_keys.EXCHANGE
-
 logger = logging.getLogger("uvicorn.error")
 
 sync_db_context = contextmanager(database_accessor.get_pg_sync_conn)
