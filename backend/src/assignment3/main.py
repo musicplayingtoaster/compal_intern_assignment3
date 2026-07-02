@@ -35,7 +35,7 @@ async def delete_todo(id: Annotated[int, Body()]):
 async def update_todo(data: Todo):
     await producer.publish(routing_key=mq_keys.UPDATE_KEY, data=data.model_dump())
     # database.update_todo(data.id, data.resolved)
-    return "updated"
+    return "Producer Published: UPDATE"
 
 
 # # app mount at the end, as if before the static file application will capture the request before the @app stuff does

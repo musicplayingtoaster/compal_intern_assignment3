@@ -19,10 +19,11 @@ async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         try:
             payload = json.loads(message.body.decode())
+            print("Payload:", payload)
             
             conn_cache = await database_accessor.get_rdcache_async_conn()
             async with async_db_context() as conn_db, conn_cache:
-                await database.update_todo(primary_key=payload['id'], resolved=payload['resolved'], conn_db=conn_db, conn_cache=conn_cache)
+                await database.update_todo(primary_key=payload['id'], _resolved=payload['resolved'], conn_db=conn_db, conn_cache=conn_cache)
                 print("Updated Todo in Database!")
             
             # returns the primary key and resolved used to allow js to update
