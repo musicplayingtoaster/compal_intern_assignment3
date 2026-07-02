@@ -23,8 +23,13 @@ async def init_publisher():
         print("Producer Initialization Complete!")
 
 async def publish(routing_key, data = None):
-    await _pub_exchange.publish(message=aio_pika.Message(body=json.dumps(data).encode()), 
+    print("Publishing Message!")
+    confirmation = await _pub_exchange.publish(message=aio_pika.Message(body=json.dumps(data).encode()), 
                                 routing_key=routing_key)
+    if confirmation:
+        print("Message Published!")
+    else:
+        print("Message Unconfirmed! Just get good man")
 
 async def close_publisher():
     global _pub_connection
