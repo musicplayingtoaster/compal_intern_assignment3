@@ -13,7 +13,7 @@ WS_KEY = mq_keys.WS_KEY
 async def lifespan(app: FastAPI):
     await broadcaster()
 
-app = FastAPI()
+app = FastAPI(lifespan=lifespan)
 
 class ConnectionManager:
     def __init__(self):
