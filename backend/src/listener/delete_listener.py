@@ -22,13 +22,12 @@ async def process_message(message: aio_pika.IncomingMessage):
         try:
             payload = json.loads(message.body.decode()) # Primary Key
 
-            async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn as conn_cache:
+            async with async_db_context() as conn_db, await database_accessor.get_rdcache_async_conn() as conn_cache:
                 await database.remove_todo(primary_key=payload, conn_db=conn_db, conn_cache=conn_cache)
                 print("Removed from Database!")
             
             await publish_to_websockets((payload, DELETE_KEY))
             print("Published to Websockets!")
-            await message.ack()
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
             await message.reject()

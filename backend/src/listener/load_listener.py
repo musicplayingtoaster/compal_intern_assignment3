@@ -20,14 +20,13 @@ async def process_message(message: aio_pika.IncomingMessage):
     print("Load Listener Heard Message!")
     async with message.process():
         try:
-            with sync_db_context() as conn_db, database_accessor.get_rdcache_sync_conn as conn_cache:
+            with sync_db_context() as conn_db, database_accessor.get_rdcache_sync_conn() as conn_cache:
                 retrieved_todos = database.retrieve_all_todos(conn_db=conn_db, conn_cache=conn_cache)
                 print("Retrieved todos from Database!")
             
             
             await publish_to_websockets((retrieved_todos, LOAD_KEY))
             print("Published to Websockets!")
-            await message.ack()
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
             await message.reject()
