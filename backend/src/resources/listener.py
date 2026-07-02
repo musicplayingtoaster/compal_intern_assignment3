@@ -18,7 +18,7 @@ class Listener:
 
             print("Getting Channel...")
             self.channel = await self.connection.channel()
-            await self.channel.set_qos(prefetch_count=10) # limits number of unack messages to 1
+            await self.channel.set_qos(prefetch_count=10) # limits number of unack messages to 10
             print("Channel Created!")
 
             print("Declaring Exchange...")
@@ -44,17 +44,6 @@ class Listener:
                 print(message)
                 asyncio.create_task(process_message(message))
                 print("Task created! Starting to Process...")
-        
-        # await self.queue.consume(process_message)
-        # print("Consuming Started!")
-
-        # try:
-        #     while True:
-        #         await asyncio.sleep(1)
-        # except asyncio.CancelledError:
-        #     print("Listener stopped.")
-        #     await self.channel.close()
-        #     await self.connection.close()
     
 listener_manager = Listener()
 

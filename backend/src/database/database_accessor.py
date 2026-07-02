@@ -29,9 +29,11 @@ def create_lifespan(rabbitmq_listener):
             global postgres_sync_pool, postgres_async_pool, rediscache_sync_client, rediscache_async_client
             postgres_sync_pool = ConnectionPool(kwargs=connection_params_db, 
                                                 open=False, 
+                                                min_size=5, max_size=25,
                                                 check=ConnectionPool.check_connection)
             postgres_async_pool = AsyncConnectionPool(kwargs=connection_params_db, 
                                                       open=False,
+                                                      min_size=5, max_size=25,
                                                       check=ConnectionPool.check_connection)
             
             sync_pool = redis.ConnectionPool(**connection_params_redis_cache)

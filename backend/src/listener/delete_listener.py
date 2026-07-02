@@ -21,11 +21,15 @@ async def process_message(message: aio_pika.IncomingMessage):
             print("Payload:", payload)
 
             # stuck here vvv (never enters)
-            conn_cache = await database_accessor.get_rdcache_async_conn()
-            async with async_db_context() as conn_db, conn_cache:
-                print("Removing from Database...")
-                await database.remove_todo(primary_key=payload, conn_db=conn_db, conn_cache=conn_cache)
-                print("Removed from Database!")
+            try:
+                async with async_db_context() as conn_db:
+                    conn_cache = await database_accessor.get_rdcache_async_conn()
+                    async with conn_cache:
+                        print("Removing from Database...")
+                        await database.remove_todo(primary_key=payload, conn_db=conn_db, conn_cache=conn_cache)
+                        print("Removed from Database!")
+            except Exception as e:
+                print("Exception Happened", e)
             
             await publish_to_websockets((payload, DELETE_KEY))
             print("Published to Websockets!")
