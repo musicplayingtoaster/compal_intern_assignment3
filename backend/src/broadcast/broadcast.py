@@ -1,12 +1,17 @@
 # rabbitmq listener sends stuff here
 # dedicated websocket server to push to all clients
-import aio_pika, uvicorn
+import json, aio_pika, uvicorn
 from resources import mq_keys
 from resources.listener import listener_manager
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from contextlib import asynccontextmanager
 
 # routing keys
 WS_KEY = mq_keys.WS_KEY
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    await broadcaster()
 
 app = FastAPI()
 
@@ -36,7 +41,7 @@ manager = ConnectionManager()
 async def process_message(message: aio_pika.IncomingMessage):
     async with message.process():
         try:
-            payload = message.body.decode()
+            payload = json.loads(json.loads(message.body.decode()))
             
             # Javascript will recieve a tuple of (data, action)
             # Take the action in Javascript to determine what to do with said data
@@ -51,41 +56,10 @@ async def broadcaster():
 
 @app.websocket("/ws")
 async def handle_websockets(websocket:WebSocket):
-    await manager.connect(websocket)
     try:
-        await broadcaster()
+        await manager.connect(websocket)
     except WebSocketDisconnect:
         manager.disconnect(websocket)
-
-
-# async def init():
-#     print("initiating...")
-#     shutdown_trigger = asyncio.Event()
-    
-#     global _websocket_manager 
-#     _websocket_manager = WebSocketBroadcastServer(host="0.0.0.0", port=8765)
-#     await _websocket_manager.start()
-#     print(f"WebSocket server started on ws://{_websocket_manager.host}:{_websocket_manager.port}")
-
-#     rabbitmq_task = asyncio.create_task(broadcaster())
-
-#     loop = asyncio.get_event_loop()
-
-#     def helper_stop_signal():
-#         print("Received shutdown signal from Docker...")
-#         shutdown_trigger.set()
-
-#     for sig in (signal.SIGTERM, signal.SIGINT):
-#         loop.add_signal_handler(sig, helper_stop_signal)
-
-
-#     try:
-#         await shutdown_trigger.wait()
-#     finally:
-#         print("Shutting down listener...")
-#         rabbitmq_task.cancel()
-#         await asyncio.gather(rabbitmq_task, return_exceptions=True)
-#         print("System shutdown complete.")
 
 def main():
     # asyncio.run(init())
