@@ -19,18 +19,23 @@ app = FastAPI(lifespan=lifespan)
 class ConnectionManager:
     def __init__(self):
         self.active_connections: set[WebSocket] = set()
+        self.attempting_connection: bool = False
     
     # connection needs to be async as it requires waiting to ensure the websocket connection from client is successful
     async def connect(self, websocket:WebSocket):
+        self.attempting_connection = True
         await websocket.accept()
         self.active_connections.add(websocket)
+        self.attempting_connection = False
         print("connected:", websocket)
         
-    
     async def disconnect(self, websocket:WebSocket):
         self.active_connections.discard(websocket)
         print("disconnected:", websocket)
     
+    def currently_connecting(self) -> bool:
+        return self.attempting_connection
+
     async def broadcast(self, data):
         if not self.active_connections:
             return
@@ -46,6 +51,10 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 async def process_message(message: aio_pika.IncomingMessage):
+    if manager.currently_connecting():
+        await message.reject(requeue=True)
+        return
+
     async with message.process():
         try:
             payload = json.loads(message.body.decode())
