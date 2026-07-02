@@ -31,7 +31,7 @@ async def process_message(message: aio_pika.IncomingMessage):
             await message.ack()
         except Exception as e:
             print(f"Failed to process message. Error: {e}")
-            await message.reject(requeue=True)
+            await message.reject()
 
 async def delete_listen():
     print("Delete_Listener attempting to connect to RabbitMQ")
