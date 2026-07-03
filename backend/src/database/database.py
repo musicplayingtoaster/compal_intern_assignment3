@@ -148,7 +148,7 @@ async def update_todo(primary_key:int, resolved:int, conn_db: AsyncConnection, c
 
             print("About to commit to cache...")
             updated_todo = await cursor.fetchone()
-            conn_cache.setex(f"todo:{primary_key}",     
+            await conn_cache.setex(f"todo:{primary_key}",     
                              CACHETTL, 
                              Todo(id=primary_key, todo=updated_todo[0], resolved=resolved).model_dump_json())
             print("Commited to Cache!")
