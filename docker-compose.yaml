@@ -1,14 +1,13 @@
 services:
   nginx-proxy:
-    image: nginx:latest
+    build:
+      context: .
+      dockerfile: ngx.Dockerfile
     container_name: nginx-proxy
     ports:
       - "3000:3000"
     networks:
       - todo-app-network
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/src/static:/usr/share/nginx/html:ro
     depends_on:
       app-1:
         condition: service_healthy
@@ -112,7 +111,6 @@ services:
     networks:
       - todo-app-network
     volumes:
-      - ./redis.conf:/usr/local/etc/redis/redis.conf:ro
       - rdcdata:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]

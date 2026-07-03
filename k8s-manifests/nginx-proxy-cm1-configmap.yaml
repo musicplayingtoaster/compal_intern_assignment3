@@ -1,0 +1,43 @@
+apiVersion: v1
+data:
+  helper.js: "const form = document.getElementById('todo_form');\nconst todo_list = document.querySelector('.todo_list');\nlet ws = new WebSocket(`ws://${window.location.host}/ws`);\nlet reconnectInterval = 1000;\nconst maxReconnectInterval = 30000;\n\nws.onopen = () => {\n    console.log(\"Successfully connected to Websocket Server I guess\")\n};\n\nws.onclose = (event) => {\n    console.warn(`WebSocket closed. Code: ${event.code}. Reason: ${event.reason}`);\n    if (event.code !== 1000) {\n        console.log(`attempting reconnection`)\n\n        setTimeout(() => {\n            reconnectInterval = Math.min(reconnectInterval * 2, maxReconnectInterval);\n            ws = new WebSocket(`ws://${window.location.host}/ws`);\n        }, reconnectInterval);\n    }\n}\n\nwindow.onbeforeunload = function() {\n    ws.close(1000, \"Page reloading\");\n};\n\nws.onmessage = (event) => { // websocket message recieved from client, updates page\n    console.log(event)\n\n    let payload = JSON.parse(event.data)\n    console.log(payload)\n    switch(payload[1]){\n        case 'create':\n            let todo_item = payload[0];\n            createTodo(todo_item['id'], todo_item['todo']);\n            break;\n        case 'load':\n            let data = payload[0];\n            console.log(data);\n            data.forEach(element => {\n                createTodo(element[0], element[1], element[2]);\n            });\n            break;\n        case 'update':\n            let update = payload[0]\n            updateTodo(update['id'], update['resolved'])\n            break;\n        case 'delete':\n            let id = payload[0];\n            document.getElementById(id.toString()).remove();\n            break;\n        default:\n            console.log('Unknown Action was Recieved')\n    }\n};\n\nform.addEventListener('submit', async function(event) {\n    event.preventDefault();\n    const formData = new FormData(this);\n    // for (let [key, value] of formData.entries()) {\n    //     console.log(`${key}: ${value}`);\n    // }\n\n    let [data] = formData.entries();\n    //console.log(data);\n    if (data[1] != '') {\n        await fetch('api/submit', {\n            method: 'POST',\n            body: formData\n        })\n        .then(response => response.json())\n        .then(data => {\n            console.log(data);\n            // createTodo(data);\n        })\n        .catch(error => {\n            console.error(\"Error:\", error)\n        });\n\n        form.reset();\n    }\n});\n\nwindow.addEventListener(\"load\", () => {\n    console.log(\"page loaded! attempting to get database stuff...\")\n    fetch('api/load', {\n        method: 'GET'\n    })\n    .then(response => response.json())\n    .then(data => console.log(data))\n    .catch(error => console.error(\"Error:\", error));\n})\n\ntodo_list.addEventListener('change', function(event){\n    if (event.target && event.target.type === 'checkbox') {\n        const checkbox = event.target;\n        fetch('api/update', {\n            method: 'PUT',\n            headers: {\n                'Content-Type': 'application/json'\n            },\n            body: JSON.stringify((checkbox.checked) ? \n            {\"id\":checkbox.parentElement.id, \"todo\":\"\", \"resolved\":1} : \n            {\"id\":checkbox.parentElement.id, \"todo\":\"\", \"resolved\":0}),\n        })\n        .then(response => response.json())\n        .then(data => console.log(data))\n        .catch(error => console.error(\"Error:\", error));\n    }\n});\n\nfunction createTodo(id, todo, resolved = 0) {\n    const todoDiv = document.createElement('div');\n    console.log(id, todo, resolved);\n\n    // note: 0=primarykey,1=todostring,2=resolved\n    todoDiv.className = \"todo_item\";\n    todoDiv.id = id.toString();\n    todoDiv.innerHTML = `\n    <input id=\"todo\" name=\"resolved\" type=\"checkbox\">\n    <label for=\"todo\">${todo}</label>\n    <button id=\"delete\" onclick=\"deleteSelf(${id})\" type=\"button\">Delete</button>\n    `;\n    todo_list.appendChild(todoDiv);\n    if (resolved == 1){\n        todoDiv.querySelector('input').checked = true;\n    }\n}\n\nfunction deleteSelf(id){\n    console.log(\"self removal.\", id)\n    fetch('api/delete', {\n        method: 'DELETE',\n        body: id,\n    })\n    .then(response => response.json())\n    .then(data => console.log(data))\n    .catch(error => console.error(\"Error:\", error));\n}\n\nfunction updateTodo(id, resolved){\n    console.log(\"updating!\", id)\n    let parent_todo = document.getElementById(id.toString())\n    let checkbox = parent_todo.querySelector('input[name=\"resolved\"]')\n    if (resolved == 1) {checkbox.checked = true;} else {checkbox.checked = false;}\n}"
+  index.html: "<!DOCTYPE html>\n<head>\n    <meta charset=\"utf-8\">\n    <meta name=\"viewport\" \n          content=\"width=device-width, initial-scale=1, shrink-to-fit=no, \n                   maximum-scale=1.0, user-scalable=0\">\n    <title>ToDo or Not ToDo</title>\n    <link rel=\"stylesheet\" href=\"stylesheet.css\">\n</head>\n<body>\n    <h1>\n        A Todo List :>\n    </h1>\n    <p>\n        Though I rarely follow todo lists...\n    </p>\n    <form id=\"todo_form\", action=\"/submit\", method=\"POST\">\n        <label for=\"todo\">Insert Item To Do:</label>\n        <input type=\"text\" id=\"todo\" name=\"todo\">\n        <input type=\"submit\" value=\"Submit\">\n    </form>\n\n    <div class=\"todo_list\"></div>\n\n    <script type=\"text/javascript\" src=\"helper.js\"></script>\n</body>"
+  stylesheet.css: |-
+    body {
+        font-family: 'Courier New', Courier, monospace;
+        color:black;
+        place-items: center;
+    }
+
+    .todo_list {
+        margin-top: 5vw;
+    }
+
+    .todo_item {
+        margin-top: 1vw;
+        width: 80vw;
+        display: flex;
+        justify-content: space-between;
+        background-color: aliceblue;
+    }
+
+    .todo_item:has(input[type="checkbox"]:checked) label {
+        text-decoration: line-through;
+        color: #888888;
+    }
+
+    input[type="submit"] {
+        background-color:white;
+        font-family: 'Courier New', Courier, monospace;
+    }
+
+    button {
+        background-color: #cf5e4c;
+        color: white;
+        font-family: 'Courier New', Courier, monospace;
+    }
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: nginx-proxy
+  name: nginx-proxy-cm1

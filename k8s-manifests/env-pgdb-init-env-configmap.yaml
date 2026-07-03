@@ -1,0 +1,10 @@
+apiVersion: v1
+data:
+  POSTGRES_DB: todo-list-db
+  POSTGRES_PASSWORD: todo!compal123
+  POSTGRES_USER: db-user
+kind: ConfigMap
+metadata:
+  labels:
+    io.kompose.service: postgres-db-env-pgdb-init-env
+  name: env-pgdb-init-env

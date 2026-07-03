@@ -1,0 +1,63 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f - -o ./temp-k8s
+    kompose.version: 1.38.0 (a8f5d1cbd)
+  labels:
+    io.kompose.service: app-1
+  name: app-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: app-1
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f - -o ./temp-k8s
+        kompose.version: 1.38.0 (a8f5d1cbd)
+      labels:
+        io.kompose.service: app-1
+    spec:
+      containers:
+        - env:
+            - name: DB_DATABASE
+              value: todo-list-db
+            - name: DB_HOST
+              value: postgres-db
+            - name: DB_PASSWORD
+              value: todo!compal123
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: db-user
+            - name: RBMQ_HOST
+              value: rabbitmq
+            - name: RBMQ_PORT
+              value: "5672"
+            - name: RDC_HOST
+              value: redis-cache
+            - name: RDC_PORT
+              value: "6379"
+            - name: RDPS_HOST
+              value: redis-pubsub
+            - name: RDPS_PORT
+              value: "6379"
+            - name: UV_HTTP_TIMEOUT
+              value: "60"
+          image: app-1
+          livenessProbe:
+            exec:
+              command:
+                - python
+                - -c
+                - import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)
+            failureThreshold: 3
+            periodSeconds: 30
+            timeoutSeconds: 5
+          name: app-1
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+      restartPolicy: Always
