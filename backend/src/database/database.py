@@ -133,16 +133,24 @@ async def remove_todo(primary_key:int, conn_db: AsyncConnection, conn_cache: aio
     except psycopg.OperationalError as e:
         print("Failed to open database and/or cache:", e, "(in short, you failed lmao.)")
 
-async def update_todo(primary_key:int, _resolved:int, conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
+# ERROR HERE!!! NOT UPDATING PROPERLY TO DATABASE
+async def update_todo(primary_key:int, resolved:int, conn_db: AsyncConnection, conn_cache: aioredis.Redis) -> tuple:
     try:
-        #with helper.get_pg_sync_conn() as connection_db, helper.get_rdcache_sync_conn() as connection_cache:
-        async with conn_db.cursor() as cursor:
-            await cursor.execute("UPDATE todo_list SET resolved = %s WHERE id = %s RETURNING todo", (_resolved, primary_key,))
-            await conn_db.commit()
+        
+        print("Primary Key:", primary_key, "|| Resolved Status:", resolved)
+        print("P-Key Type:", type(primary_key), "|| R-Status Type:", type(resolved))
 
+        async with conn_db.cursor() as cursor:
+            print("Connected to DB! About to execute UPDATE...")
+            await cursor.execute("UPDATE todo_list SET resolved = %s WHERE id = %s RETURNING todo", (resolved, primary_key,))
+            await conn_db.commit()
+            print("UPDATE executed and commited!")
+
+            print("About to commit to cache...")
             updated_todo = await cursor.fetchone()
             conn_cache.setex(f"todo:{primary_key}",     
                              CACHETTL, 
-                             Todo(id=primary_key, todo=updated_todo[0], resolved=_resolved).model_dump_json())
+                             Todo(id=primary_key, todo=updated_todo[0], resolved=resolved).model_dump_json())
+            print("Commited to Cache!")
     except psycopg.OperationalError as e:
         print("Failed to open database and/or cache:", e, "(in short, you failed lmao.)")

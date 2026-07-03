@@ -117,7 +117,7 @@ function createTodo(id, todo, resolved = 0) {
     todoDiv.className = "todo_item";
     todoDiv.id = id.toString();
     todoDiv.innerHTML = `
-    <input id="todo" name="resolve" type="checkbox">
+    <input id="todo" name="resolved" type="checkbox">
     <label for="todo">${todo}</label>
     <button id="delete" onclick="deleteSelf(${id})" type="button">Delete</button>
     `;
@@ -141,6 +141,6 @@ function deleteSelf(id){
 function updateTodo(id, resolved){
     console.log("updating!", id)
     let parent_todo = document.getElementById(id.toString())
-    let checkbox = parent_todo.querySelector('input[name="resolve"]')
+    let checkbox = parent_todo.querySelector('input[name="resolved"]')
     if (resolved == 1) {checkbox.checked = true;} else {checkbox.checked = false;}
 }
