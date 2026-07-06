@@ -3,6 +3,7 @@ kind: Deployment
 metadata:
   annotations:
     kompose.cmd: kompose convert -f docker-compose.yaml -o ./k8s-manifests
+    kompose.image-pull-policy: Never
     kompose.version: 1.38.0 (a8f5d1cbd)
   labels:
     io.kompose.service: ll-server
@@ -16,6 +17,7 @@ spec:
     metadata:
       annotations:
         kompose.cmd: kompose convert -f docker-compose.yaml -o ./k8s-manifests
+        kompose.image-pull-policy: Never
         kompose.version: 1.38.0 (a8f5d1cbd)
       labels:
         io.kompose.service: ll-server
@@ -31,7 +33,8 @@ spec:
           envFrom:
             - configMapRef:
                 name: env-client-init-env
-          image: ll-server
+          image: docker.io/library/compal_intern_assignment3-ll-server:latest
+          imagePullPolicy: Never
           name: load-listener
           ports:
             - containerPort: 8000

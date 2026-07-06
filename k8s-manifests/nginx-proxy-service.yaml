@@ -3,6 +3,8 @@ kind: Service
 metadata:
   annotations:
     kompose.cmd: kompose convert -f docker-compose.yaml -o ./k8s-manifests
+    kompose.image-pull-policy: Never
+    kompose.service.type: nodeport
     kompose.version: 1.38.0 (a8f5d1cbd)
   labels:
     io.kompose.service: nginx-proxy
@@ -14,3 +16,4 @@ spec:
       targetPort: 3000
   selector:
     io.kompose.service: nginx-proxy
+  type: NodePort

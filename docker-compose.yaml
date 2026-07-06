@@ -3,9 +3,13 @@ services:
     build:
       context: .
       dockerfile: ngx.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-nginx-proxy:latest
+    labels:
+      kompose.image-pull-policy: Never
+      kompose.service.type: nodeport
     container_name: nginx-proxy
     ports:
-      - "3000:3000"
+      - "3000"
     networks:
       - todo-app-network
     depends_on:
@@ -21,6 +25,9 @@ services:
     build:
       context: .
       dockerfile: api.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-app-1:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: app-1
     env_file:
       - path: ./.env/client-init.env
@@ -28,7 +35,7 @@ services:
     environment:
       - UV_HTTP_TIMEOUT=60
     ports:
-      - "8000:8000"
+      - "8000"
     networks:
       - todo-app-network
     healthcheck:
@@ -48,6 +55,9 @@ services:
     build: 
       context: .
       dockerfile: api.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-app-2:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: app-2
     env_file:
       - path: ./.env/client-init.env
@@ -55,7 +65,7 @@ services:
     environment:
       - UV_HTTP_TIMEOUT=60
     ports:
-      - "8080:8000"
+      - "8000"
     networks:
       - todo-app-network
     healthcheck:
@@ -80,7 +90,7 @@ services:
       - path: ./.env/pgdb-init.env
         required: true
     ports:
-      - "5432:5432"
+      - "5432"
     networks:
       - todo-app-network
     volumes:
@@ -107,7 +117,7 @@ services:
     container_name: redis-cache
     restart: always
     ports:
-      - "127.0.0.1:6379:6379"
+      - "6379"
     networks:
       - todo-app-network
     volumes:
@@ -125,7 +135,7 @@ services:
     container_name: rabbitmq
     restart: always
     ports:
-      - "5672:5672"
+      - "5672"
     networks:
       - todo-app-network
     volumes:
@@ -142,6 +152,9 @@ services:
     build:
       context: .
       dockerfile: ls.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-cl-server:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: create-listener
     env_file:
       - path: ./.env/client-init.env
@@ -150,7 +163,7 @@ services:
       - PYTHONUNBUFFERED=1
     command: ["uv", "run", "create_listener"]
     ports:
-      - "9000:8000"
+      - "8000"
     networks:
       - todo-app-network
     depends_on:
@@ -165,6 +178,9 @@ services:
     build:
       context: .
       dockerfile: ls.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-ll-server:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: load-listener
     env_file:
       - path: ./.env/client-init.env
@@ -173,7 +189,7 @@ services:
       - PYTHONUNBUFFERED=1
     command: ["uv", "run", "load_listener"]
     ports:
-      - "9010:8000"
+      - "8000"
     networks:
       - todo-app-network
     depends_on:
@@ -188,6 +204,9 @@ services:
     build:
       context: .
       dockerfile: ls.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-ul-server:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: update-listener
     env_file:
       - path: ./.env/client-init.env
@@ -196,7 +215,7 @@ services:
       - PYTHONUNBUFFERED=1
     command: ["uv", "run", "update_listener"]
     ports:
-      - "9020:8000"
+      - "8000"
     networks:
       - todo-app-network
     depends_on:
@@ -211,6 +230,9 @@ services:
     build:
       context: .
       dockerfile: ls.Dockerfile
+    image: docker.io/library/ompal_intern_assignment3-dl-server:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: delete-listener
     env_file:
       - path: ./.env/client-init.env
@@ -219,7 +241,7 @@ services:
       - PYTHONUNBUFFERED=1
     command: ["uv", "run", "delete_listener"]
     ports:
-      - "9030:8000"
+      - "8000"
     networks:
       - todo-app-network
     depends_on:
@@ -234,6 +256,9 @@ services:
     build:
       context: .
       dockerfile: ws.Dockerfile
+    image: docker.io/library/compal_intern_assignment3-websocket-server:latest
+    labels:
+      kompose.image-pull-policy: Never
     container_name: websocket-server
     env_file:
       - path: ./.env/client-init.env
@@ -241,7 +266,7 @@ services:
     environment:
       - PYTHONUNBUFFERED=1
     ports:
-      - "8765:8765"
+      - "8765"
     networks:
       - todo-app-network
     healthcheck:
