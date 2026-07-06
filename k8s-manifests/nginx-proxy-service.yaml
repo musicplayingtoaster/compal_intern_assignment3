@@ -10,6 +10,8 @@ metadata:
     io.kompose.service: nginx-proxy
   name: nginx-proxy
 spec:
+  externalIPs:
+    - 20.120.208.28
   ports:
     - name: "3000"
       port: 3000

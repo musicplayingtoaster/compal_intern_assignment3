@@ -89,6 +89,10 @@ async def handle_websockets(websocket:WebSocket):
         print("bruuuuuuuuuuuuh exception:", e)
         await manager.disconnect(websocket)
 
+@app.get("/health")
+async def health():
+    print("Open!")
+
 def main():
     # asyncio.run(init())
     uvicorn.run(app, host="0.0.0.0", port=8765)
