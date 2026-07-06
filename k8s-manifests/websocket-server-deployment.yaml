@@ -36,7 +36,7 @@ spec:
               command:
                 - python
                 - -c
-                - import socket; s = socket.socket(); s.connect(('localhost', 8765))
+                - import socket; s = socket.socket(); s.settimeout(5); s.connect(('localhost', 8765)); s.close()
             failureThreshold: 3
             periodSeconds: 30
             timeoutSeconds: 5

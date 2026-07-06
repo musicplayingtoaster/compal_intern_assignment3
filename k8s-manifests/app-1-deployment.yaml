@@ -32,12 +32,9 @@ spec:
           image: docker.io/library/compal_intern_assignment3-app-1:latest
           imagePullPolicy: Never
           livenessProbe:
-            exec:
-              command:
-                - python
-                - -c
-                - import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=2)
-            failureThreshold: 3
+            httpGet:
+              path: /health
+              port: 8000
             periodSeconds: 30
             timeoutSeconds: 5
           name: app-1
