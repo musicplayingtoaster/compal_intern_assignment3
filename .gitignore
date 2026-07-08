@@ -16,3 +16,4 @@ secrets/
 
 # other
 docker-images/
+k8s-manifests/
